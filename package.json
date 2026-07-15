@@ -21,6 +21,6 @@
     "validate": "node scripts/validate-extension.js"
   },
   "dependencies": {
-    "katex": "0.16.47"
+    "katex": "0.17.0"
   }
 }
