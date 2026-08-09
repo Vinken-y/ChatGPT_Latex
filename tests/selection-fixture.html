@@ -43,7 +43,7 @@
   <body>
     <main>
       <p>选择正文后，页面原生操作位于上方，扩展操作自动放到选区下方。</p>
-      <p id="selection-target"><strong>Sample A⁺ includes B₂ and C₃ values.</strong> The text also contains X₃⁻, Y₂⁻ and x⁻¹ y⁻² notation.</p>
+      <p id="selection-target"><strong>Sample A⁺ includes B₂ values.</strong> The expression <span role="math" data-math-source="x^2"><span class="katex"><span class="katex-html" aria-hidden="true">x²</span></span></span> and charged label <span role="math" data-math-source="\mathrm{SO}_{4}^{2-}"><span class="katex"><span class="katex-html" aria-hidden="true">SO₄²⁻</span></span></span> appear inside ordinary text.</p>
       <p>普通正文的复制入口与自动识别公式保持独立。</p>
     </main>
 
@@ -53,6 +53,7 @@
     </div>
 
     <script>
+      globalThis.__wlcSelectionStorageListeners = [];
       globalThis.chrome = {
         i18n: {
           getMessage(key) {
@@ -65,9 +66,34 @@
             return messages[key] || "";
           }
         },
-        runtime: { lastError: null },
-        storage: { local: { get(defaults, callback) { callback(defaults); } } }
+        runtime: {
+          lastError: null,
+          sendMessage(message, callback) {
+            callback({
+              ok: true,
+              mathml: '<math xmlns="http://www.w3.org/1998/Math/MathML"><msup><mi>x</mi><mn>2</mn></msup></math>'
+            });
+          }
+        },
+        storage: {
+          local: { get(defaults, callback) { callback(defaults); } },
+          onChanged: {
+            addListener(listener) { globalThis.__wlcSelectionStorageListeners.push(listener); }
+          }
+        }
       };
+      globalThis.ClipboardItem = class ClipboardItem {
+        constructor(data) { this.data = data; }
+      };
+      Object.defineProperty(navigator, "clipboard", {
+        configurable: true,
+        value: {
+          write(items) {
+            globalThis.__wlcClipboardItems = items;
+            return Promise.resolve();
+          }
+        }
+      });
     </script>
     <script src="../src/latex-normalizer.js"></script>
     <script src="../src/word-mathml.js"></script>
@@ -87,15 +113,78 @@
         native.style.left = `${Math.round(bounds.left)}px`;
         native.style.top = `${Math.round(bounds.top - native.offsetHeight - 8)}px`;
 
-        const payload = WordTextClipboard.buildSelectionPayload(range, document);
         const probe = document.createElement("output");
         probe.id = "word-payload-probe";
         probe.hidden = true;
-        probe.dataset.sup = String((payload.html.match(/<sup>/g) || []).length);
-        probe.dataset.sub = String((payload.html.match(/<sub>/g) || []).length);
-        probe.dataset.hasUnsafeAttributes = String(/\s(?:class|id|data-|on\w+)=/i.test(payload.html));
         document.body.appendChild(probe);
         document.dispatchEvent(new Event("selectionchange"));
+        window.setTimeout(async () => {
+          const action = document.querySelector("#chatgpt-latex-selection-actions button");
+          probe.dataset.mixedActionVisible = String(Boolean(action));
+          action?.click();
+          await new Promise((resolve) => window.setTimeout(resolve, 120));
+          const item = globalThis.__wlcClipboardItems?.[0];
+          const html = item ? await item.data["text/html"].text() : "";
+          const plainText = item ? await item.data["text/plain"].text() : "";
+          probe.dataset.mathCount = String((html.match(/<math\b/g) || []).length);
+          probe.dataset.hasText = String(html.includes("Sample A"));
+          probe.dataset.hasSup = String(html.includes("<sup>"));
+          probe.dataset.hasIonText = String(html.includes("SO<sub>4</sub><sup>2−</sup>"));
+          probe.dataset.hasUnsafeFormulaMarkup = String(/data-math-source|katex-html|class=["'][^"']*katex/i.test(html));
+          probe.dataset.hasBold = String(/<(?:b|strong)\b|font-weight\s*:/i.test(html));
+          probe.dataset.usesWordNormal = String(/class="MsoNormal"/i.test(html));
+          probe.dataset.plainHasLatex = String(plainText.includes("x^2") && plainText.includes("SO42−"));
+          const notifySetting = (key, oldValue, newValue) => {
+            globalThis.__wlcSelectionStorageListeners.forEach((listener) => listener({
+              [key]: { oldValue, newValue }
+            }, "local"));
+          };
+          notifySetting("removeBoldFormatting", true, false);
+          await new Promise((resolve) => window.setTimeout(resolve, 80));
+          document.querySelector("#chatgpt-latex-selection-actions.is-visible button")?.click();
+          await new Promise((resolve) => window.setTimeout(resolve, 120));
+          const boldItem = globalThis.__wlcClipboardItems?.[0];
+          const boldHtml = boldItem ? await boldItem.data["text/html"].text() : "";
+          probe.dataset.boldWhenBoldRemovalDisabled = String(/<(?:b|strong)\b|font-weight\s*:/i.test(boldHtml));
+          probe.dataset.normalWhenBoldRemovalDisabled = String(/class="MsoNormal"/i.test(boldHtml));
+          notifySetting("removeBoldFormatting", false, true);
+          await new Promise((resolve) => window.setTimeout(resolve, 80));
+          notifySetting("matchWordFormatting", true, false);
+          await new Promise((resolve) => window.setTimeout(resolve, 80));
+          document.querySelector("#chatgpt-latex-selection-actions.is-visible button")?.click();
+          await new Promise((resolve) => window.setTimeout(resolve, 120));
+          const unmatchedItem = globalThis.__wlcClipboardItems?.[0];
+          const unmatchedHtml = unmatchedItem ? await unmatchedItem.data["text/html"].text() : "";
+          probe.dataset.boldWithOnlyFormattingDisabled = String(/<(?:b|strong)\b|font-weight\s*:/i.test(unmatchedHtml));
+          probe.dataset.normalWhenFormattingDisabled = String(/class="MsoNormal"/i.test(unmatchedHtml));
+          notifySetting("removeBoldFormatting", true, false);
+          await new Promise((resolve) => window.setTimeout(resolve, 80));
+          document.querySelector("#chatgpt-latex-selection-actions.is-visible button")?.click();
+          await new Promise((resolve) => window.setTimeout(resolve, 120));
+          const unformattedItem = globalThis.__wlcClipboardItems?.[0];
+          const unformattedHtml = unformattedItem ? await unformattedItem.data["text/html"].text() : "";
+          probe.dataset.boldWhenBothDisabled = String(/<(?:b|strong)\b|font-weight\s*:/i.test(unformattedHtml));
+          probe.dataset.normalWhenBothDisabled = String(/class="MsoNormal"/i.test(unformattedHtml));
+          notifySetting("removeBoldFormatting", false, true);
+          await new Promise((resolve) => window.setTimeout(resolve, 80));
+          notifySetting("matchWordFormatting", false, true);
+          await new Promise((resolve) => window.setTimeout(resolve, 80));
+          notifySetting("formulaRecognition", true, false);
+          await new Promise((resolve) => window.setTimeout(resolve, 80));
+          probe.dataset.mixedWithTextOnly = String(Boolean(
+            document.querySelector("#chatgpt-latex-selection-actions.is-visible")
+          ));
+          notifySetting("formulaRecognition", false, true);
+          await new Promise((resolve) => window.setTimeout(resolve, 80));
+          probe.dataset.mixedWithBoth = String(Boolean(
+            document.querySelector("#chatgpt-latex-selection-actions.is-visible")
+          ));
+          notifySetting("textRecognition", true, false);
+          await new Promise((resolve) => window.setTimeout(resolve, 80));
+          probe.dataset.mixedWithFormulaOnly = String(Boolean(
+            document.querySelector("#chatgpt-latex-selection-actions.is-visible")
+          ));
+        }, 180);
       });
     </script>
   </body>

@@ -49,11 +49,15 @@
     </span>
     <span id="dynamic-math" role="math">y₁</span>
     <script>
+      globalThis.__wlcStorageListeners = [];
       globalThis.chrome = {
         runtime: { lastError: null },
         storage: {
           local: {
             get(defaults, callback) { callback(defaults); }
+          },
+          onChanged: {
+            addListener(listener) { globalThis.__wlcStorageListeners.push(listener); }
           }
         }
       };
@@ -67,6 +71,26 @@
       window.setTimeout(() => {
         document.getElementById("dynamic-math").setAttribute("data-math-source", "y_1");
       }, 120);
+      window.setTimeout(() => {
+        const formula = document.querySelector("[data-math-source]");
+        formula.dispatchEvent(new PointerEvent("pointerover", { bubbles: true, composed: true }));
+        window.setTimeout(() => {
+          const probe = document.createElement("output");
+          probe.id = "settings-behavior-probe";
+          probe.hidden = true;
+          const visibleButtons = () => Array.from(
+            document.querySelectorAll("#chatgpt-latex-quick-actions button:not([hidden])")
+          ).map((button) => button.textContent);
+          probe.dataset.defaultButtons = visibleButtons().join("|");
+          document.body.appendChild(probe);
+          globalThis.__wlcStorageListeners.forEach((listener) => listener({
+            showLatexCopy: { oldValue: false, newValue: true }
+          }, "local"));
+          window.requestAnimationFrame(() => {
+            probe.dataset.latexButtons = visibleButtons().join("|");
+          });
+        }, 60);
+      }, 220);
       window.setTimeout(() => {
         const range = document.createRange();
         range.selectNodeContents(document.querySelector("[data-math-source]"));

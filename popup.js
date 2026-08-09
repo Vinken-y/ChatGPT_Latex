@@ -2,9 +2,14 @@
   "use strict";
 
   const DEFAULTS = {
-    closeAfterCopy: true
+    closeAfterCopy: true,
+    formulaRecognition: true,
+    textRecognition: true,
+    removeBoldFormatting: true,
+    matchWordFormatting: true,
+    showLatexCopy: false
   };
-  const closeInput = document.getElementById("close-after-copy");
+  const settingInputs = Array.from(document.querySelectorAll("input[data-setting]"));
   const status = document.getElementById("status");
   let statusTimer = null;
 
@@ -26,10 +31,11 @@
     statusTimer = window.setTimeout(() => status.classList.remove("is-visible"), 1200);
   }
 
-  function save() {
+  function save(event) {
+    const input = event.currentTarget;
     chrome.storage.local.set(
       {
-        closeAfterCopy: closeInput.checked
+        [input.dataset.setting]: input.checked
       },
       showSaved
     );
@@ -38,8 +44,10 @@
   localizePopup();
 
   chrome.storage.local.get(DEFAULTS, (settings) => {
-    closeInput.checked = settings.closeAfterCopy;
+    settingInputs.forEach((input) => {
+      input.checked = Boolean(settings[input.dataset.setting]);
+    });
   });
 
-  closeInput.addEventListener("change", save);
+  settingInputs.forEach((input) => input.addEventListener("change", save));
 })();

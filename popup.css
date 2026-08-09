@@ -17,7 +17,7 @@ body {
 }
 
 main {
-  padding: 22px;
+  padding: 18px 22px;
 }
 
 header {
@@ -25,7 +25,7 @@ header {
   border-bottom: 1px solid #25282b;
   display: flex;
   gap: 12px;
-  padding-bottom: 20px;
+  padding-bottom: 16px;
 }
 
 .mark {
@@ -55,7 +55,7 @@ header p {
 }
 
 section {
-  padding-top: 20px;
+  padding-top: 16px;
 }
 
 h2 {
@@ -63,7 +63,7 @@ h2 {
   font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
 }
 
 .setting {
@@ -71,9 +71,9 @@ h2 {
   border-top: 1px solid #25282b;
   cursor: pointer;
   display: grid;
-  gap: 16px;
+  gap: 12px;
   grid-template-columns: minmax(0, 1fr) auto;
-  padding: 16px 0;
+  padding: 10px 0;
 }
 
 .setting strong,
@@ -145,7 +145,7 @@ h2 {
   font-size: 13px;
   justify-content: space-between;
   margin-top: 8px;
-  min-height: 48px;
+  min-height: 44px;
   padding: 0 14px;
 }
 
@@ -158,10 +158,12 @@ h2 {
   color: #58bd91;
   font-size: 13px;
   line-height: 1.4;
-  margin: 12px 0 0;
-  min-height: 16px;
+  margin: 0;
   opacity: 0;
-  text-align: right;
+  pointer-events: none;
+  position: fixed;
+  right: 22px;
+  top: 22px;
   transform: translateY(2px);
   transition: opacity 160ms ease, transform 160ms ease;
 }

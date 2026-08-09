@@ -16,15 +16,60 @@
         </div>
       </header>
 
+      <section aria-labelledby="feature-title">
+        <h2 id="feature-title" data-i18n="featureControls">Feature controls</h2>
+
+        <label class="setting" for="formula-recognition">
+          <span>
+            <strong data-i18n="formulaRecognition">Formula recognition</strong>
+            <small data-i18n="formulaRecognitionDescription">Show the formula hover box and editor</small>
+          </span>
+          <input id="formula-recognition" data-setting="formulaRecognition" type="checkbox">
+        </label>
+
+        <label class="setting" for="text-recognition">
+          <span>
+            <strong data-i18n="textRecognition">Text recognition</strong>
+            <small data-i18n="textRecognitionDescription">Show Copy to Word after plain-text selection</small>
+          </span>
+          <input id="text-recognition" data-setting="textRecognition" type="checkbox">
+        </label>
+
+      </section>
+
       <section aria-labelledby="behavior-title">
         <h2 id="behavior-title" data-i18n="copyBehavior">Copy behavior</h2>
+
+        <label class="setting" for="remove-bold-formatting">
+          <span>
+            <strong data-i18n="removeBoldFormatting">Remove source bold</strong>
+            <small data-i18n="removeBoldFormattingDescription">Paste copied text at regular weight</small>
+          </span>
+          <input id="remove-bold-formatting" data-setting="removeBoldFormatting" type="checkbox">
+        </label>
+
+        <label class="setting" for="match-word-formatting">
+          <span>
+            <strong data-i18n="matchWordFormatting">Match Word body formatting</strong>
+            <small data-i18n="matchWordFormattingDescription">Prefer the destination font and paragraph spacing</small>
+          </span>
+          <input id="match-word-formatting" data-setting="matchWordFormatting" type="checkbox">
+        </label>
+
+        <label class="setting" for="show-latex-copy">
+          <span>
+            <strong data-i18n="showLatexCopy">Show Copy LaTeX</strong>
+            <small data-i18n="showLatexCopyDescription">Add the LaTeX action to formula controls</small>
+          </span>
+          <input id="show-latex-copy" data-setting="showLatexCopy" type="checkbox">
+        </label>
 
         <label class="setting" for="close-after-copy">
           <span>
             <strong data-i18n="closeAfterCopy">Close after copy</strong>
             <small data-i18n="closeAfterCopyDescription">Close the editor after a successful clipboard write</small>
           </span>
-          <input id="close-after-copy" type="checkbox">
+          <input id="close-after-copy" data-setting="closeAfterCopy" type="checkbox">
         </label>
       </section>
 

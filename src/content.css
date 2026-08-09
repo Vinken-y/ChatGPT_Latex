@@ -299,6 +299,16 @@
   transform: translateY(1px);
 }
 
+#chatgpt-latex-quick-actions [hidden],
+#chatgpt-latex-root [hidden] {
+  display: none !important;
+}
+
+html[data-wlc-formula-recognition-disabled] [data-wlc-recognized] {
+  background: transparent !important;
+  outline-color: transparent !important;
+}
+
 [data-wlc-recognized="display"]:hover,
 [data-wlc-recognized="inline"]:hover,
 [data-wlc-recognized="display"][data-wlc-active],
@@ -439,6 +449,10 @@ html[data-color-scheme="dark"] #chatgpt-latex-selection-actions .wlc-selection-b
   #chatgpt-latex-root .wlc-footer {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+
+  #chatgpt-latex-root .wlc-footer:has([data-copy-mode="latex"][hidden]) {
+    grid-template-columns: 1fr;
   }
 }
 
