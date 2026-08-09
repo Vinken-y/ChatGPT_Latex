@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extensionName__",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "__MSG_extensionDescription__",
   "default_locale": "en",
   "permissions": ["clipboardWrite", "storage"],
@@ -37,6 +37,7 @@
       "js": [
         "src/latex-normalizer.js",
         "src/word-mathml.js",
+        "src/word-text.js",
         "src/content.js"
       ],
       "css": ["src/content.css"],

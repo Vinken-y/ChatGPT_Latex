@@ -1,6 +1,6 @@
 {
   "extensionName": { "message": "ChatGPT_Latex" },
-  "extensionDescription": { "message": "Copy normalized LaTeX or paste AI-chat formulas directly into Microsoft Word." },
+  "extensionDescription": { "message": "Copy AI-chat formulas and selected scientific text into Microsoft Word." },
   "popupSubtitle": { "message": "Formula copy settings" },
   "copyBehavior": { "message": "Copy behavior" },
   "closeAfterCopy": { "message": "Close after copy" },
@@ -15,6 +15,10 @@
   "copyWord": { "message": "Copy to Word" },
   "copyWordFailed": { "message": "Word conversion or copy failed" },
   "copyLatexFailed": { "message": "LaTeX copy failed" },
+  "textQuickActions": { "message": "Text copy actions" },
+  "copyTextWord": { "message": "Copy text to Word" },
+  "copiedTextWord": { "message": "Text copied for Word" },
+  "copyTextWordFailed": { "message": "Text copy for Word failed" },
   "formulaPreview": { "message": "Formula preview" },
   "closeEditor": { "message": "Close formula editor" },
   "editorSubtitle": { "message": "Normalized LaTeX with Word-ready copy" },

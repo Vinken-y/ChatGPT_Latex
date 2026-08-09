@@ -1,7 +1,7 @@
 {
   "name": "chatgpt-latex",
-  "version": "1.0.0",
-  "description": "Detect LaTeX on AI chat pages and copy Word-ready equations.",
+  "version": "1.1.0",
+  "description": "Copy Word-ready equations and scientific text from AI chat pages.",
   "private": true,
   "license": "MIT",
   "repository": {
@@ -17,7 +17,7 @@
   },
   "scripts": {
     "test": "node --test tests/*.test.js",
-    "check": "node --check src/background.js && node --check src/latex-normalizer.js && node --check src/word-mathml.js && node --check src/content.js && node --check popup.js && node --check scripts/validate-extension.js",
+    "check": "node --check src/background.js && node --check src/latex-normalizer.js && node --check src/word-mathml.js && node --check src/word-text.js && node --check src/content.js && node --check popup.js && node --check scripts/validate-extension.js",
     "validate": "node scripts/validate-extension.js"
   },
   "dependencies": {

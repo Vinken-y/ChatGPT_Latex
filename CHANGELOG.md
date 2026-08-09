@@ -4,6 +4,29 @@ All notable changes to ChatGPT_Latex are documented here. Dates use ISO 8601.
 
 本文件记录 ChatGPT_Latex 的重要变更，日期使用 ISO 8601 格式。
 
+## [1.1.0] - 2026-08-09
+
+### Added / 新增
+
+- Added a selection-triggered **Copy text to Word** action for ordinary scientific prose.
+- 新增仅由用户文本选区触发的“复制文本到 Word”操作。
+- Converts Unicode superscripts/subscripts to semantic Word rich text while preserving safe headings, lists, emphasis, links, and table structure.
+- 将 Unicode 上下标转换为 Word 可识别的语义化富文本，并保留安全的标题、列表、强调、链接和表格结构。
+- Added collision-aware placement beside ChatGPT's native selection actions, with light/dark styling and formula-boundary suppression.
+- 新增对 ChatGPT 原生选区窗格的碰撞避让、深浅色适配和公式边界抑制。
+
+### Fixed / 修复
+
+- Restored formula recognition on the current ChatGPT renderer, which exposes source through `span[role="math"][data-math-source]` instead of MathML annotations.
+- 修复新版 ChatGPT 使用 `span[role="math"][data-math-source]` 取代 MathML 注释后导致的公式识别失效。
+- Added narrowly filtered formula-source attribute observation so late renderer updates are recognized without watching unrelated page attributes.
+- 新增仅限公式源码属性的动态观察，使后加载公式能够被识别，同时避免监听无关网页属性。
+
+### Validation / 验证
+
+- Added Unicode-script unit tests and headless Chrome fixtures for native-menu avoidance, current ChatGPT formula markup, dynamic formula updates, and formula/text interaction boundaries.
+- 新增 Unicode 上下标单元测试，以及原生窗格避让、新版 ChatGPT 公式结构、动态公式更新和公式/文本交互边界的无头 Chrome 测试。
+
 ## [1.0.0] - 2026-07-15
 
 ### Added / 新增

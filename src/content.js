@@ -3,14 +3,26 @@
 
   const normalizer = globalThis.WordLatexNormalizer;
   const wordMathml = globalThis.WordMathml;
+  const wordText = globalThis.WordTextClipboard;
   const ROOT_ID = "chatgpt-latex-root";
   const QUICK_ACTIONS_ID = "chatgpt-latex-quick-actions";
+  const SELECTION_ACTIONS_ID = "chatgpt-latex-selection-actions";
   const TOAST_ID = "chatgpt-latex-toast";
   const FORMULA_SELECTOR = [
     ".katex-display",
     ".katex",
     ".math-block[data-math]",
     ".math-inline[data-math]",
+    "[data-math-source]",
+    "[data-latex]",
+    "[data-tex]",
+    "[data-formula]",
+    "[data-equation]",
+    "[data-testid='math-renderer']",
+    "[data-testid='math-inline']",
+    "[data-testid='math-block']",
+    "[role='math']",
+    "script[type^='math/tex']",
     "mjx-container",
     "math"
   ].join(",");
@@ -21,12 +33,18 @@
   const SCAN_SLICE_BUDGET_MS = 8;
   const QUICK_ACTIONS_HIDE_DELAY_MS = 140;
   const COMPATIBILITY_DEBOUNCE_MS = 120;
+  const SELECTION_SETTLE_DELAY_MS = 48;
 
   let currentDialog = null;
   let activeFormula = null;
   let quickActions = null;
   let quickActionsHideTimer = null;
   let quickActionsPositionFrame = null;
+  let selectionActions = null;
+  let selectionRange = null;
+  let selectionUpdateTimer = null;
+  let selectionPositionFrame = null;
+  let pointerSelecting = false;
   let scanScheduled = false;
   const pendingScanRoots = new Set();
   const recognizedFormulas = new WeakSet();
@@ -44,21 +62,40 @@
       return null;
     }
 
+    const sourceContainer = formula.closest(
+      "[data-math], [data-math-source], [data-latex], [data-tex], [data-formula], " +
+      "[data-equation], [role='math']"
+    );
+    if (sourceContainer) {
+      return sourceContainer;
+    }
+
     const display = formula.closest(".katex-display");
     if (display) {
       return display;
     }
 
     const container = formula.closest(
-      ".katex, .math-block[data-math], .math-inline[data-math], mjx-container"
+      ".katex, .math-block[data-math], .math-inline[data-math], [data-math-source], " +
+      "[data-latex], [data-tex], [data-formula], [data-equation], " +
+      "[data-testid='math-renderer'], [data-testid='math-inline'], [data-testid='math-block'], " +
+      "[role='math'], mjx-container"
     );
-    return container || formula;
+    if (container) {
+      return container;
+    }
+
+    if (formula.matches("math, annotation[encoding], script[type^='math/tex']")) {
+      return formula.parentElement || formula;
+    }
+
+    return formula;
   }
 
   function findFormula(target) {
     if (
       !(target instanceof Element) ||
-      target.closest(`#${ROOT_ID}, #${QUICK_ACTIONS_ID}, #${TOAST_ID}`)
+      target.closest(`#${ROOT_ID}, #${QUICK_ACTIONS_ID}, #${SELECTION_ACTIONS_ID}, #${TOAST_ID}`)
     ) {
       return null;
     }
@@ -100,9 +137,30 @@
   }
 
   function extractLatex(formula) {
-    const dataMath = formula.getAttribute("data-math") || formula.closest("[data-math]")?.getAttribute("data-math");
-    if (dataMath) {
-      return dataMath;
+    const sourceAttributes = [
+      "data-math",
+      "data-math-source",
+      "data-latex",
+      "data-tex",
+      "data-formula",
+      "data-equation"
+    ];
+    const sourceSelector = sourceAttributes.map((attribute) => `[${attribute}]`).join(",");
+    const sourceNodes = [
+      formula,
+      formula.closest(sourceSelector),
+      formula.querySelector(sourceSelector)
+    ];
+    for (const node of sourceNodes) {
+      if (!node) {
+        continue;
+      }
+      for (const attribute of sourceAttributes) {
+        const value = node.getAttribute(attribute);
+        if (value?.trim()) {
+          return value;
+        }
+      }
     }
 
     const annotation = findTexAnnotation(formula);
@@ -114,6 +172,11 @@
     const altText = math?.getAttribute("alttext") || math?.getAttribute("aria-label");
     if (altText) {
       return altText;
+    }
+
+    const rendererLabel = formula.getAttribute("aria-label");
+    if (rendererLabel && !/^math(?:ematical)?(?: formula| expression)?$/i.test(rendererLabel.trim())) {
+      return rendererLabel;
     }
 
     return "";
@@ -137,6 +200,9 @@
       const display =
         formula.classList.contains("katex-display") ||
         formula.classList.contains("math-block") ||
+        formula.getAttribute("data-testid") === "math-block" ||
+        formula.getAttribute("data-display") === "block" ||
+        formula.style.display === "block" ||
         formula.matches('math[display="block"]');
       formula.setAttribute("data-wlc-recognized", display ? "display" : "inline");
     }
@@ -210,7 +276,7 @@
 
     if (
       root instanceof Element &&
-      root.closest(`#${ROOT_ID}, #${QUICK_ACTIONS_ID}, #${TOAST_ID}`)
+      root.closest(`#${ROOT_ID}, #${QUICK_ACTIONS_ID}, #${SELECTION_ACTIONS_ID}, #${TOAST_ID}`)
     ) {
       return;
     }
@@ -319,6 +385,286 @@
     toast.classList.toggle("is-error", Boolean(error));
     toast.classList.add("is-visible");
     toast._hideTimer = window.setTimeout(() => toast.classList.remove("is-visible"), 1500);
+  }
+
+  async function copySelectionToWord(range) {
+    if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
+      throw new Error("Rich clipboard writing is unavailable");
+    }
+
+    const payload = wordText.buildSelectionPayload(range, document);
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        "text/html": new Blob([payload.html], { type: "text/html" }),
+        "text/plain": new Blob([payload.plainText], { type: "text/plain" })
+      })
+    ]);
+  }
+
+  function elementFromNode(node) {
+    if (node instanceof Element) {
+      return node;
+    }
+
+    return node?.parentElement || null;
+  }
+
+  function rangeIntersectsFormula(range) {
+    const start = elementFromNode(range.startContainer);
+    const end = elementFromNode(range.endContainer);
+    if (start?.closest(FORMULA_SELECTOR) || end?.closest(FORMULA_SELECTOR)) {
+      return true;
+    }
+
+    const common = elementFromNode(range.commonAncestorContainer);
+    if (!common) {
+      return false;
+    }
+    if (common.matches(FORMULA_SELECTOR)) {
+      return true;
+    }
+
+    for (const formula of common.querySelectorAll(FORMULA_SELECTOR)) {
+      try {
+        if (range.intersectsNode(formula)) {
+          return true;
+        }
+      } catch (error) {
+        // A streaming response can detach a candidate between the query and range check.
+      }
+    }
+
+    return false;
+  }
+
+  function rangeIsEligibleForTextCopy(range) {
+    const start = elementFromNode(range.startContainer);
+    const end = elementFromNode(range.endContainer);
+    if (!start || !end || !range.toString().trim()) {
+      return false;
+    }
+
+    const blockedSelector = [
+      "input",
+      "textarea",
+      "select",
+      "[contenteditable]:not([contenteditable='false'])",
+      `[id='${ROOT_ID}']`,
+      `[id='${QUICK_ACTIONS_ID}']`,
+      `[id='${SELECTION_ACTIONS_ID}']`,
+      `[id='${TOAST_ID}']`
+    ].join(",");
+    if (start.closest(blockedSelector) || end.closest(blockedSelector)) {
+      return false;
+    }
+
+    return !rangeIntersectsFormula(range);
+  }
+
+  function hideSelectionActions() {
+    window.clearTimeout(selectionUpdateTimer);
+    selectionUpdateTimer = null;
+    if (selectionPositionFrame !== null) {
+      window.cancelAnimationFrame(selectionPositionFrame);
+      selectionPositionFrame = null;
+    }
+
+    selectionRange = null;
+    selectionActions?.classList.remove("is-visible");
+  }
+
+  function visibleSelectionRects(range) {
+    return Array.from(range.getClientRects()).filter((rect) => rect.width > 0 && rect.height > 0);
+  }
+
+  function expandedRect(rect, amount) {
+    return {
+      left: rect.left - amount,
+      right: rect.right + amount,
+      top: rect.top - amount,
+      bottom: rect.bottom + amount,
+      width: rect.width + amount * 2,
+      height: rect.height + amount * 2
+    };
+  }
+
+  function rectsOverlap(first, second) {
+    return first.left < second.right && first.right > second.left &&
+      first.top < second.bottom && first.bottom > second.top;
+  }
+
+  function nearbyNativeFloatingRects(selectionBounds) {
+    const selectors = [
+      '[role="menu"]',
+      '[role="toolbar"]',
+      "[data-radix-popper-content-wrapper]",
+      "[data-floating-ui-portal]"
+    ].join(",");
+    const nearby = expandedRect(selectionBounds, 180);
+    const results = [];
+
+    for (const element of document.querySelectorAll(selectors)) {
+      if (element.closest(`#${ROOT_ID}, #${QUICK_ACTIONS_ID}, #${SELECTION_ACTIONS_ID}, #${TOAST_ID}`)) {
+        continue;
+      }
+
+      const rect = element.getBoundingClientRect();
+      if (
+        rect.width <= 0 || rect.height <= 0 || rect.width > 600 || rect.height > 240 ||
+        !rectsOverlap(rect, nearby)
+      ) {
+        continue;
+      }
+
+      const style = window.getComputedStyle(element);
+      if (style.visibility !== "hidden" && style.display !== "none" && Number(style.opacity || 1) > 0) {
+        results.push(rect);
+      }
+    }
+
+    return results;
+  }
+
+  function candidateRect(left, top, width, height) {
+    return { left, top, right: left + width, bottom: top + height, width, height };
+  }
+
+  function positionSelectionActions() {
+    selectionPositionFrame = null;
+    if (!selectionActions || !selectionRange) {
+      hideSelectionActions();
+      return;
+    }
+
+    const rects = visibleSelectionRects(selectionRange);
+    if (rects.length === 0) {
+      hideSelectionActions();
+      return;
+    }
+
+    const first = rects[0];
+    const last = rects[rects.length - 1];
+    const bounds = selectionRange.getBoundingClientRect();
+    const width = selectionActions.offsetWidth;
+    const height = selectionActions.offsetHeight;
+    const gap = 8;
+    const padding = 8;
+    const avoid = [
+      ...rects.map((rect) => expandedRect(rect, 3)),
+      ...nearbyNativeFloatingRects(bounds).map((rect) => expandedRect(rect, 4))
+    ];
+    const candidates = [
+      candidateRect(last.left, last.bottom + gap, width, height),
+      candidateRect(last.right - width, last.bottom + gap, width, height),
+      candidateRect(last.right + gap, last.top + (last.height - height) / 2, width, height),
+      candidateRect(last.left - width - gap, last.top + (last.height - height) / 2, width, height),
+      candidateRect(first.left, first.top - height - gap, width, height)
+    ];
+    const fits = (candidate) =>
+      candidate.left >= padding && candidate.top >= padding &&
+      candidate.right <= window.innerWidth - padding &&
+      candidate.bottom <= window.innerHeight - padding &&
+      !avoid.some((rect) => rectsOverlap(candidate, rect));
+    let selected = candidates.find(fits);
+
+    if (!selected) {
+      const left = Math.min(
+        Math.max(padding, last.left),
+        Math.max(padding, window.innerWidth - width - padding)
+      );
+      const top = Math.min(
+        Math.max(padding, last.bottom + gap),
+        Math.max(padding, window.innerHeight - height - padding)
+      );
+      selected = candidateRect(left, top, width, height);
+    }
+
+    selectionActions.style.left = `${Math.round(selected.left)}px`;
+    selectionActions.style.top = `${Math.round(selected.top)}px`;
+  }
+
+  function scheduleSelectionActionsPosition() {
+    if (!selectionRange || selectionPositionFrame !== null) {
+      return;
+    }
+
+    selectionPositionFrame = window.requestAnimationFrame(positionSelectionActions);
+  }
+
+  function ensureSelectionActions() {
+    if (selectionActions?.isConnected) {
+      return selectionActions;
+    }
+
+    const actions = document.createElement("div");
+    actions.id = SELECTION_ACTIONS_ID;
+    actions.className = "wlc-selection-actions";
+    actions.setAttribute("role", "group");
+    actions.setAttribute("aria-label", translate("textQuickActions", "Text copy actions"));
+
+    const copyWord = createButton(
+      translate("copyTextWord", "Copy text to Word"),
+      "wlc-selection-button"
+    );
+    actions.appendChild(copyWord);
+    actions.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
+    actions.addEventListener("click", async (event) => {
+      if (!copyWord.contains(event.target) || !selectionRange) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      const range = selectionRange.cloneRange();
+      try {
+        await copySelectionToWord(range);
+        showPageToast(translate("copiedTextWord", "Text copied for Word"), false);
+        hideSelectionActions();
+      } catch (error) {
+        showPageToast(translate("copyTextWordFailed", "Text copy for Word failed"), true);
+      }
+    });
+
+    document.documentElement.appendChild(actions);
+    selectionActions = actions;
+    return actions;
+  }
+
+  function updateSelectionActions() {
+    selectionUpdateTimer = null;
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+      hideSelectionActions();
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    if (!rangeIsEligibleForTextCopy(range)) {
+      hideSelectionActions();
+      return;
+    }
+
+    selectionRange = range.cloneRange();
+    hideQuickActions();
+    const actions = ensureSelectionActions();
+    positionSelectionActions();
+    actions.classList.add("is-visible");
+    window.setTimeout(scheduleSelectionActionsPosition, 80);
+  }
+
+  function scheduleSelectionActionsUpdate(delay) {
+    window.clearTimeout(selectionUpdateTimer);
+    selectionUpdateTimer = window.setTimeout(
+      updateSelectionActions,
+      typeof delay === "number" ? delay : SELECTION_SETTLE_DELAY_MS
+    );
+  }
+
+  function selectionActionsVisible() {
+    return Boolean(selectionActions?.classList.contains("is-visible"));
   }
 
   function cancelQuickActionsHide() {
@@ -452,6 +798,11 @@
   }
 
   function showQuickActions(candidate) {
+    const selection = window.getSelection();
+    if (selectionActionsVisible() || (selection && !selection.isCollapsed && selection.toString().trim())) {
+      return;
+    }
+
     const formula = markRecognizedFormula(candidate);
     if (!formula) {
       return;
@@ -508,6 +859,7 @@
   }
 
   async function openDialog(formula) {
+    hideSelectionActions();
     hideQuickActions();
     closeDialog();
 
@@ -689,6 +1041,44 @@
     }
   }, true);
 
+  document.addEventListener("pointerdown", (event) => {
+    if (selectionActions?.contains(event.target)) {
+      return;
+    }
+
+    pointerSelecting = true;
+    hideSelectionActions();
+  }, true);
+
+  document.addEventListener("pointerup", () => {
+    pointerSelecting = false;
+    const selection = window.getSelection();
+    if (selection && !selection.isCollapsed && selection.toString().trim()) {
+      scheduleSelectionActionsUpdate();
+    }
+  }, true);
+
+  document.addEventListener("selectionchange", () => {
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed) {
+      hideSelectionActions();
+      return;
+    }
+
+    if (!pointerSelecting) {
+      scheduleSelectionActionsUpdate(80);
+    }
+  });
+
+  document.addEventListener("keyup", (event) => {
+    if (
+      event.shiftKey || event.key.startsWith("Arrow") || event.key === "Home" ||
+      event.key === "End" || (event.key.toLowerCase() === "a" && (event.ctrlKey || event.metaKey))
+    ) {
+      scheduleSelectionActionsUpdate();
+    }
+  }, true);
+
   document.addEventListener("pointerout", (event) => {
     if (!activeFormula) {
       return;
@@ -744,14 +1134,18 @@
 
     event.preventDefault();
     event.stopPropagation();
+    hideSelectionActions();
     openDialog(formula);
   }, true);
 
   window.addEventListener("scroll", scheduleQuickActionsPosition, { capture: true, passive: true });
+  window.addEventListener("scroll", hideSelectionActions, { capture: true, passive: true });
   window.addEventListener("resize", scheduleQuickActionsPosition, { passive: true });
+  window.addEventListener("resize", hideSelectionActions, { passive: true });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       hideQuickActions();
+      hideSelectionActions();
     }
   });
 
@@ -759,9 +1153,14 @@
 
   const formulaObserver = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
+      if (mutation.type === "attributes" && mutation.target instanceof Element) {
+        scheduleScan(mutation.target);
+        continue;
+      }
+
       const containsPageElement = Array.from(mutation.addedNodes).some((node) =>
         node instanceof Element &&
-        !node.closest(`#${ROOT_ID}, #${QUICK_ACTIONS_ID}, #${TOAST_ID}`)
+        !node.closest(`#${ROOT_ID}, #${QUICK_ACTIONS_ID}, #${SELECTION_ACTIONS_ID}, #${TOAST_ID}`)
       );
       if (containsPageElement) {
         scheduleScan(mutation.target instanceof Element ? mutation.target : document);
@@ -771,9 +1170,25 @@
     if (activeFormula && !activeFormula.isConnected) {
       hideQuickActions();
     }
+
+    if (
+      selectionRange &&
+      (!selectionRange.startContainer.isConnected || !selectionRange.endContainer.isConnected)
+    ) {
+      hideSelectionActions();
+    }
   });
 
   formulaObserver.observe(document.documentElement, {
+    attributeFilter: [
+      "data-equation",
+      "data-formula",
+      "data-latex",
+      "data-math",
+      "data-math-source",
+      "data-tex"
+    ],
+    attributes: true,
     childList: true,
     subtree: true
   });
