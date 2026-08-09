@@ -71,4 +71,5 @@ All notable changes to ChatGPT_Latex are documented here. Dates use ISO 8601.
 - Added automated source checks, manifest/localization validation, unit tests, and extension fixtures.
 - 新增源码语法检查、Manifest/本地化校验、单元测试和扩展测试页面。
 
+[1.1.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.0.0

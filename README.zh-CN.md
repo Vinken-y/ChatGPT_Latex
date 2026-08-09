@@ -32,11 +32,11 @@ ChatGPT_Latex 是一个轻量级 Chrome Manifest V3 扩展，用于将 AI 聊天
 
 ### GitHub 正式版
 
-1. 从 [v1.0.0 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.0.0) 下载 `ChatGPT_Latex-v1.0.0.zip`。
+1. 从 [v1.1.0 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.0) 下载 `ChatGPT_Latex-v1.1.0.zip`。
 2. 解压该文件。
 3. 打开 `chrome://extensions` 或 `edge://extensions`。
 4. 开启“开发者模式”。
-5. 点击“加载已解压的扩展程序”，选择解压后的 `ChatGPT_Latex-v1.0.0` 目录。
+5. 点击“加载已解压的扩展程序”，选择解压后的 `ChatGPT_Latex-v1.1.0` 目录。
 
 ### 源码安装
 

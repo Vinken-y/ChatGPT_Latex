@@ -38,11 +38,11 @@ The extension reads formula-related DOM on these explicitly matched sites. Selec
 
 ### GitHub release
 
-1. Download `ChatGPT_Latex-v1.0.0.zip` from the [v1.0.0 release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.0.0).
+1. Download `ChatGPT_Latex-v1.1.0.zip` from the [v1.1.0 release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.0).
 2. Extract the archive.
 3. Open `chrome://extensions` or `edge://extensions`.
 4. Enable **Developer mode**.
-5. Select **Load unpacked** and choose the extracted `ChatGPT_Latex-v1.0.0` directory.
+5. Select **Load unpacked** and choose the extracted `ChatGPT_Latex-v1.1.0` directory.
 
 ### Source checkout
 
