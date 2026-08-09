@@ -6,14 +6,17 @@
 [![Release](https://img.shields.io/github/v/release/Vinken-y/ChatGPT_Latex)](https://github.com/Vinken-y/ChatGPT_Latex/releases/latest)
 [![License](https://img.shields.io/github/license/Vinken-y/ChatGPT_Latex)](LICENSE)
 
-ChatGPT_Latex is a lightweight Manifest V3 extension that detects LaTeX formulas on supported AI chat pages. Hover a recognized formula to copy normalized LaTeX or copy the complete equation to Microsoft Word. Double-click a formula to inspect and edit its source before copying.
+ChatGPT_Latex is a lightweight Manifest V3 extension for moving scientific content from supported AI chat pages into Microsoft Word. Hover a recognized formula to copy normalized LaTeX or the complete Word equation; select ordinary prose to copy Word-ready text with real superscript and subscript formatting.
 
-[简体中文](README.zh-CN.md) | [Privacy](PRIVACY.md) | [Security](SECURITY.md) | [Performance](https://github.com/Vinken-y/ChatGPT_Latex/blob/v1.0.0/docs/PERFORMANCE.md) | [Changelog](CHANGELOG.md)
+[简体中文](README.zh-CN.md) | [Privacy](PRIVACY.md) | [Security](SECURITY.md) | [Performance](docs/PERFORMANCE.md) | [Changelog](CHANGELOG.md)
 
 ## Features
 
-- Detects KaTeX, MathJax, native MathML, and `data-math` formulas.
+- Detects KaTeX, MathJax, native MathML, `data-math`, and current ChatGPT `data-math-source` formulas.
 - Shows one shared hover toolbar with equal-priority **Copy LaTeX** and **Copy to Word** actions.
+- Shows **Copy text to Word** only after the user selects non-formula text; it does not scan prose in the background.
+- Converts Unicode scientific notation such as `CTPP⁺`, `H₂O`, `I₃⁻`, `g⁻¹`, and `cm⁻²` into real Word superscript/subscript runs while preserving semantic rich-text structure.
+- Keeps formula and text workflows separate: selections intersecting a rendered formula do not show the text action.
 - Removes physical line breaks, indentation, comments, zero-width characters, and outer math delimiters without removing LaTeX row separators such as `\\`.
 - Copies a complete equation to Word as MathML-rich clipboard data, with normalized Word-linear LaTeX as the plain-text fallback.
 - Converts common matrix and alignment environments for Word's LaTeX fallback syntax.
@@ -29,7 +32,7 @@ ChatGPT_Latex is a lightweight Manifest V3 extension that detects LaTeX formulas
 - Gemini: `gemini.google.com`
 - Microsoft Copilot: `copilot.microsoft.com`
 
-The extension reads only formula-related DOM on these explicitly matched sites. Page changes by a provider can require a compatibility update.
+The extension reads formula-related DOM on these explicitly matched sites. Selected prose is cloned only after the user makes a text selection and activates **Copy text to Word**. Page changes by a provider can require a compatibility update.
 
 ## Install
 
@@ -56,6 +59,14 @@ Load the cloned directory as an unpacked extension. No build step is required.
 3. Choose **Copy LaTeX** or **Copy to Word**. Both actions have equal visual priority.
 4. Double-click the formula when you need to review or edit the normalized source.
 
+For ordinary scientific prose:
+
+1. Select text that does not intersect a rendered formula.
+2. Choose **Copy text to Word** from the small action shown beside the selection.
+3. Paste normally in Word. Unicode superscripts/subscripts are emitted as semantic `<sup>`/`<sub>` rich text so Word creates real script formatting.
+
+The text action is positioned below the selection by default and avoids nearby native `menu`/`toolbar` surfaces. Formula hover controls remain a separate interaction.
+
 ### What Copy to Word does
 
 **Copy to Word** copies the entire equation, not only its displayed characters. The primary clipboard format is MathML inside `text/html`; supported desktop versions of Word can consume this rich format and create a professional equation when pasted into the document body. Normalized Word-linear LaTeX is included as `text/plain` fallback data.
@@ -77,7 +88,7 @@ Word supports a subset of LaTeX rather than a complete TeX engine. The editor re
 | --- | --- |
 | `clipboardWrite` | Writes only after the user clicks a copy action. |
 | `storage` | Stores the close-after-copy preference locally; formulas are never stored. |
-| Supported-site content scripts | Detects formula DOM and displays the editor/toolbar. |
+| Supported-site content scripts | Detects formula DOM, reacts to explicit text selections, and displays local controls. |
 
 Chat content and formulas are not sent to a server, logged, analyzed, or used for telemetry. See [PRIVACY.md](PRIVACY.md) for the complete disclosure.
 
@@ -92,12 +103,13 @@ npm run check
 npm test
 ```
 
-The shipped extension is plain HTML, CSS, and JavaScript. Unit tests cover newline normalization, Word fallback conversion, MathML generation, clipboard HTML, dependency limits, and spacing behavior. Local Chrome smoke tests cover formula recognition and the shared toolbar.
+The shipped extension is plain HTML, CSS, and JavaScript. Unit tests cover newline normalization, Word fallback conversion, MathML generation, Unicode script conversion, clipboard HTML, dependency limits, and spacing behavior. Local headless Chrome tests cover current ChatGPT formula recognition, dynamic source attributes, selection-menu positioning, and the formula/text boundary.
 
 ## Performance design
 
-- A single `MutationObserver` watches added nodes only; scans are deferred to idle time and processed in bounded chunks.
+- A single `MutationObserver` watches added nodes and a narrow set of formula-source attributes; scans are deferred to idle time and processed in bounded chunks.
 - One floating toolbar and two click listeners are reused across all formulas.
+- The text action uses one shared button and reacts only to completed selections; it performs no continuous prose scan.
 - Recognition styling uses outline/overlay effects and does not add formula margin or padding.
 - KaTeX runs on demand in the extension service worker and is absent from the page content-script bundle.
 - Input compatibility checks are debounced while editing.

@@ -43,6 +43,11 @@
         <span class="katex-html" aria-hidden="true">C(i,f,s;t,R) = 1[d(i,f,s;t) ≤ R]</span>
       </span>
     </span>
+    <p>New renderer shape:</p>
+    <span role="math" aria-label="x_{n+1} = x_n + 1" data-math-source="x_{n+1} = x_n + 1" data-client-katex-layout style="display: block;">
+      <span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true">xₙ₊₁ = xₙ + 1</span></span></span>
+    </span>
+    <span id="dynamic-math" role="math">y₁</span>
     <script>
       globalThis.chrome = {
         runtime: { lastError: null },
@@ -56,6 +61,30 @@
     <script src="../src/vendor/katex.min.js"></script>
     <script src="../src/latex-normalizer.js"></script>
     <script src="../src/word-mathml.js"></script>
+    <script src="../src/word-text.js"></script>
     <script src="../src/content.js"></script>
+    <script>
+      window.setTimeout(() => {
+        document.getElementById("dynamic-math").setAttribute("data-math-source", "y_1");
+      }, 120);
+      window.setTimeout(() => {
+        const range = document.createRange();
+        range.selectNodeContents(document.querySelector("[data-math-source]"));
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        document.dispatchEvent(new Event("selectionchange"));
+      }, 500);
+      window.setTimeout(() => {
+        const probe = document.createElement("output");
+        probe.id = "formula-boundary-probe";
+        probe.hidden = true;
+        probe.dataset.recognized = String(document.querySelectorAll("[data-wlc-recognized]").length);
+        probe.dataset.textActionsVisible = String(
+          Boolean(document.querySelector("#chatgpt-latex-selection-actions.is-visible"))
+        );
+        document.body.appendChild(probe);
+      }, 900);
+    </script>
   </body>
 </html>

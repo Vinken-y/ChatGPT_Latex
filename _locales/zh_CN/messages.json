@@ -1,6 +1,6 @@
 {
   "extensionName": { "message": "ChatGPT_Latex" },
-  "extensionDescription": { "message": "复制规范化 LaTeX，或将 AI 聊天公式直接粘贴为 Microsoft Word 公式。" },
+  "extensionDescription": { "message": "将 AI 聊天公式和所选科学文本复制到 Microsoft Word。" },
   "popupSubtitle": { "message": "公式复制设置" },
   "copyBehavior": { "message": "复制行为" },
   "closeAfterCopy": { "message": "复制后关闭" },
@@ -15,6 +15,10 @@
   "copyWord": { "message": "复制到 Word" },
   "copyWordFailed": { "message": "Word 公式转换或复制失败" },
   "copyLatexFailed": { "message": "LaTeX 复制失败" },
+  "textQuickActions": { "message": "文本复制操作" },
+  "copyTextWord": { "message": "复制文本到 Word" },
+  "copiedTextWord": { "message": "文本已复制到 Word" },
+  "copyTextWordFailed": { "message": "文本复制到 Word 失败" },
   "formulaPreview": { "message": "公式预览" },
   "closeEditor": { "message": "关闭公式编辑器" },
   "editorSubtitle": { "message": "已规范化 LaTeX，并支持直接复制到 Word" },
