@@ -10,15 +10,15 @@ const {
 
 test("collapses physical newlines and indentation", () => {
   const source = `
-    C_{i,f,s}(t;R)
+    F(x;R)
       =
-    \\mathbf 1\\!\\left[d_{i,f,s}(t)\\leq R\\right]
+    \\mathbf 1\\!\\left[x\\leq R\\right]
       =1,
   `;
 
   assert.equal(
     normalizeLatexSource(source),
-    "C_{i,f,s}(t;R) = \\mathbf 1\\!\\left[d_{i,f,s}(t)\\leq R\\right] =1,"
+    "F(x;R) = \\mathbf 1\\!\\left[x\\leq R\\right] =1,"
   );
 });
 
@@ -45,26 +45,26 @@ test("removes comments without treating escaped percent signs as comments", () =
   assert.equal(normalizeLatexSource(source), "x + y + z + 50\\%");
 });
 
-test("normalizes the reported multiline indicator formula", () => {
-  const source = `C_{i,f,s}(t;R)
+test("normalizes a multiline indicator formula", () => {
+  const source = `F(x;R)
 
     =
 
-  \\mathbf 1\\!\\left[d_{i,f,s}(t)\\leq R\\right]
+  \\mathbf 1\\!\\left[x\\leq R\\right]
 
     =1,`;
 
   assert.equal(
     normalizeLatexSource(source),
-    "C_{i,f,s}(t;R) = \\mathbf 1\\!\\left[d_{i,f,s}(t)\\leq R\\right] =1,"
+    "F(x;R) = \\mathbf 1\\!\\left[x\\leq R\\right] =1,"
   );
 });
 
-test("removes physical line breaks after an equals sign in solvent selectivity", () => {
-  const source = "S=\r\n\\frac{\\overline{N}_{\\mathrm{DMC}}/N_{\\mathrm{DMC}}^{\\mathrm{bulk}}}\u2028{\\overline{N}_{\\mathrm{H_2O}}/N_{\\mathrm{H_2O}}^{\\mathrm{bulk}}}";
+test("removes physical line breaks after an equals sign in a ratio", () => {
+  const source = "R=\r\n\\frac{\\overline{A}_{1}/A_{1}^{\\mathrm{ref}}}\u2028{\\overline{B}_{2}/B_{2}^{\\mathrm{ref}}}";
   assert.equal(
     convertLatexForWord(source).latex,
-    "S= \\frac{\\overline{N}_{\\mathrm{DMC}}/N_{\\mathrm{DMC}}^{\\mathrm{bulk}}} {\\overline{N}_{\\mathrm{H_2O}}/N_{\\mathrm{H_2O}}^{\\mathrm{bulk}}}"
+    "R= \\frac{\\overline{A}_{1}/A_{1}^{\\mathrm{ref}}} {\\overline{B}_{2}/B_{2}^{\\mathrm{ref}}}"
   );
 });
 

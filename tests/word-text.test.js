@@ -7,24 +7,24 @@ const {
   splitUnicodeScripts
 } = require("../src/word-text.js");
 
-test("maps scientific Unicode superscripts and subscripts to Word script runs", () => {
-  assert.deepEqual(splitUnicodeScripts("CTPP⁺ / H₂O / I₃⁻"), [
-    { mode: null, text: "CTPP" },
+test("maps generic Unicode superscripts and subscripts to Word script runs", () => {
+  assert.deepEqual(splitUnicodeScripts("A⁺ / B₂ / C₃⁻"), [
+    { mode: null, text: "A" },
     { mode: "sup", text: "+" },
-    { mode: null, text: " / H" },
+    { mode: null, text: " / B" },
     { mode: "sub", text: "2" },
-    { mode: null, text: "O / I" },
+    { mode: null, text: " / C" },
     { mode: "sub", text: "3" },
     { mode: "sup", text: "−" }
   ]);
 });
 test("groups adjacent exponents and supports scientific subscript letters", () => {
-  assert.deepEqual(splitUnicodeScripts("g⁻¹ cm⁻² xₙ"), [
-    { mode: null, text: "g" },
+  assert.deepEqual(splitUnicodeScripts("x⁻¹ y⁻² zₙ"), [
+    { mode: null, text: "x" },
     { mode: "sup", text: "−1" },
-    { mode: null, text: " cm" },
+    { mode: null, text: " y" },
     { mode: "sup", text: "−2" },
-    { mode: null, text: " x" },
+    { mode: null, text: " z" },
     { mode: "sub", text: "n" }
   ]);
 });

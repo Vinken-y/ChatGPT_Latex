@@ -15,7 +15,7 @@ test("uses the audited vendored KaTeX release", () => {
 });
 
 test("renders a fraction as MathML for Word", () => {
-  const latex = String.raw`S=\frac{\overline{N}_{\mathrm{DMC}}/N_{\mathrm{DMC}}^{\mathrm{bulk}}}{\overline{N}_{\mathrm{H_2O}}/N_{\mathrm{H_2O}}^{\mathrm{bulk}}}`;
+  const latex = String.raw`R=\frac{\overline{A}_{1}/A_{1}^{\mathrm{ref}}}{\overline{B}_{2}/B_{2}^{\mathrm{ref}}}`;
   const mathml = latexToMathml(latex, katex);
 
   assert.match(mathml, /^<math\s/);
@@ -32,7 +32,7 @@ test("renders standard LaTeX matrix environments before Word clipboard output", 
 });
 
 test("removes KaTeX spacing nodes that Word displays as placeholder boxes", () => {
-  const latex = String.raw`C_{i,f,s}(t;R)=\mathbf 1\!\left[d_{i,f,s}(t)\leq R\right],`;
+  const latex = String.raw`F(x;R)=\mathbf 1\!\left[x\leq R\right],`;
   const mathml = latexToMathml(latex, katex);
 
   assert.doesNotMatch(mathml, /<mtext[^>]*>[\s\u2000-\u200b]*<\/mtext>/);

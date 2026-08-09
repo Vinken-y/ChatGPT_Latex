@@ -15,7 +15,7 @@ ChatGPT_Latex is a lightweight Manifest V3 extension for moving scientific conte
 - Detects KaTeX, MathJax, native MathML, `data-math`, and current ChatGPT `data-math-source` formulas.
 - Shows one shared hover toolbar with equal-priority **Copy LaTeX** and **Copy to Word** actions.
 - Shows **Copy text to Word** only after the user selects non-formula text; it does not scan prose in the background.
-- Converts Unicode scientific notation such as `CTPP⁺`, `H₂O`, `I₃⁻`, `g⁻¹`, and `cm⁻²` into real Word superscript/subscript runs while preserving semantic rich-text structure.
+- Converts generic Unicode scientific notation such as `A⁺`, `B₂`, `C₃⁻`, `x⁻¹`, and `y⁻²` into real Word superscript/subscript runs while preserving semantic rich-text structure.
 - Keeps formula and text workflows separate: selections intersecting a rendered formula do not show the text action.
 - Removes physical line breaks, indentation, comments, zero-width characters, and outer math delimiters without removing LaTeX row separators such as `\\`.
 - Copies a complete equation to Word as MathML-rich clipboard data, with normalized Word-linear LaTeX as the plain-text fallback.
