@@ -43,7 +43,7 @@
   <body>
     <main>
       <p>选择正文后，页面原生操作位于上方，扩展操作自动放到选区下方。</p>
-      <p id="selection-target"><strong>Sample A⁺ includes B₂ values.</strong> The expression <span role="math" data-math-source="x^2"><span class="katex"><span class="katex-html" aria-hidden="true">x²</span></span></span> and charged label <span role="math" data-math-source="\mathrm{SO}_{4}^{2-}"><span class="katex"><span class="katex-html" aria-hidden="true">SO₄²⁻</span></span></span> appear inside ordinary text.</p>
+      <p id="selection-target"><strong>Sample A⁺ includes B₂ values.</strong> The expression <span role="math" data-math-source="x^2"><span class="katex"><span class="katex-html" aria-hidden="true">x²</span></span></span>, cluster C<span role="math" data-math-source="_2"><span class="katex"><span class="katex-html" aria-hidden="true">₂</span></span></span>, label ABCD<span id="text-label-target" role="math" data-math-source="^+"><span class="katex"><span class="katex-html" aria-hidden="true">⁺</span></span></span>, and anion C<span role="math" data-math-source="_2^-"><span class="katex"><span class="katex-html" aria-hidden="true">₂⁻</span></span></span> appear inside ordinary text.</p>
       <p>普通正文的复制入口与自动识别公式保持独立。</p>
     </main>
 
@@ -129,11 +129,24 @@
           probe.dataset.mathCount = String((html.match(/<math\b/g) || []).length);
           probe.dataset.hasText = String(html.includes("Sample A"));
           probe.dataset.hasSup = String(html.includes("<sup>"));
-          probe.dataset.hasIonText = String(html.includes("SO<sub>4</sub><sup>2−</sup>"));
+          probe.dataset.hasMoleculeText = String(html.includes("C<span><sub>2</sub></span>"));
+          probe.dataset.hasAcronymText = String(html.includes("ABCD<span><sup>+</sup></span>"));
+          probe.dataset.hasIonText = String(html.includes("C<span><sub>2</sub><sup>−</sup></span>"));
+          probe.dataset.textLabelCount = String(
+            document.querySelectorAll("#selection-target [data-wlc-text-label]").length
+          );
+          probe.dataset.textLabelFormulaCount = String(
+            document.querySelectorAll("#selection-target [data-wlc-text-label][data-wlc-recognized]").length
+          );
           probe.dataset.hasUnsafeFormulaMarkup = String(/data-math-source|katex-html|class=["'][^"']*katex/i.test(html));
           probe.dataset.hasBold = String(/<(?:b|strong)\b|font-weight\s*:/i.test(html));
           probe.dataset.usesWordNormal = String(/class="MsoNormal"/i.test(html));
-          probe.dataset.plainHasLatex = String(plainText.includes("x^2") && plainText.includes("SO42−"));
+          probe.dataset.plainHasLabels = String(
+            plainText.includes("x^2") &&
+            plainText.includes("C2") &&
+            plainText.includes("ABCD+") &&
+            plainText.includes("C2−")
+          );
           const notifySetting = (key, oldValue, newValue) => {
             globalThis.__wlcSelectionStorageListeners.forEach((listener) => listener({
               [key]: { oldValue, newValue }
@@ -184,6 +197,23 @@
           probe.dataset.mixedWithFormulaOnly = String(Boolean(
             document.querySelector("#chatgpt-latex-selection-actions.is-visible")
           ));
+          notifySetting("formulaRecognition", true, false);
+          notifySetting("textRecognition", false, true);
+          await new Promise((resolve) => window.setTimeout(resolve, 80));
+          const labelRange = document.createRange();
+          labelRange.selectNodeContents(document.getElementById("text-label-target"));
+          selection.removeAllRanges();
+          selection.addRange(labelRange);
+          document.dispatchEvent(new Event("selectionchange"));
+          await new Promise((resolve) => window.setTimeout(resolve, 120));
+          const labelAction = document.querySelector("#chatgpt-latex-selection-actions.is-visible button");
+          probe.dataset.labelWithTextRecognitionOnly = String(Boolean(labelAction));
+          labelAction?.click();
+          await new Promise((resolve) => window.setTimeout(resolve, 120));
+          const labelItem = globalThis.__wlcClipboardItems?.[0];
+          const labelHtml = labelItem ? await labelItem.data["text/html"].text() : "";
+          probe.dataset.labelOnlyMathCount = String((labelHtml.match(/<math\b/g) || []).length);
+          probe.dataset.labelOnlyHasTextScripts = String(labelHtml.includes("<sup>+</sup>"));
         }, 180);
       });
     </script>

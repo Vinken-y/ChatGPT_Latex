@@ -10,7 +10,7 @@ ChatGPT_Latex 是一个轻量级 Chrome Manifest V3 扩展，用于将 AI 聊天
 - 全页面只复用一个悬浮工具栏，默认显示主要操作“复制到 Word”；“复制 LaTeX”可在插件设置中开启。
 - 用户选中正文、公式或混合内容后显示“复制到 Word”，不会在后台扫描普通正文。
 - 将 `A⁺`、`B₂`、`C₃⁻`、`x⁻¹`、`y⁻²` 等通用 Unicode 科学符号转换为 Word 的真正上标/下标，同时保留正文富文本结构。
-- 简单带电离子按 Word 文字处理：元素数量为下标，电荷为上标；完整方程仍按 MathML 公式处理。
+- 简单分子式和带电科学标签按 Word 文字处理，不显示公式识别框或公式编辑器：元素数量为下标，电荷为上标；方程和数学表达式仍按 MathML 公式处理。
 - 公式单独选区和混合选区流程分开：公式单独选区使用公式工具栏，混合选区使用“复制到 Word”。
 - 清理物理回车、缩进、注释、零宽字符和最外层数学分隔符，同时保留矩阵中的 LaTeX 换行命令 `\\`。
 - 将完整公式以 MathML 富剪贴板格式复制，并同时提供规范化的 Word 线性 LaTeX 纯文本回退。
@@ -33,11 +33,11 @@ ChatGPT_Latex 是一个轻量级 Chrome Manifest V3 扩展，用于将 AI 聊天
 
 ### GitHub 正式版
 
-1. 从 [v1.1.1 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.1) 下载 `ChatGPT_Latex-v1.1.1.zip`。
+1. 从 [v1.1.2 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.2) 下载 `ChatGPT_Latex-v1.1.2.zip`。
 2. 解压该文件。
 3. 打开 `chrome://extensions` 或 `edge://extensions`。
 4. 开启“开发者模式”。
-5. 点击“加载已解压的扩展程序”，选择解压后的 `ChatGPT_Latex-v1.1.1` 目录。
+5. 点击“加载已解压的扩展程序”，选择解压后的 `ChatGPT_Latex-v1.1.2` 目录。
 
 ### 源码安装
 
@@ -70,7 +70,7 @@ git clone https://github.com/Vinken-y/ChatGPT_Latex.git
 
 ### “复制到 Word”的实际逻辑
 
-“复制到 Word”复制的是整个公式，而不是公式的可见字符。主要剪贴板格式为 `text/html` 中的 MathML；受支持的 Windows 桌面版 Word 可在正文中直接粘贴为专业公式。混合选区会在原位置放入对应公式，简单带电离子则使用语义化 `<sub>`/`<sup>` 文字。剪贴板中还会同时写入规范化后的 Word 线性 LaTeX，作为 `text/plain` 回退内容。
+“复制到 Word”复制的是整个公式，而不是公式的可见字符。主要剪贴板格式为 `text/html` 中的 MathML；受支持的 Windows 桌面版 Word 可在正文中直接粘贴为专业公式。混合选区会在原位置放入对应公式，简单分子式和带电科学标签则使用语义化 `<sub>`/`<sup>` 文字。剪贴板中还会同时写入规范化后的 Word 线性 LaTeX，作为 `text/plain` 回退内容。
 
 若某个 Word 配置没有采用富剪贴板格式，可按 `Alt` + `=` 插入公式，确认输入模式为 LaTeX，再粘贴并选择“专业”转换。该人工流程仅是回退方案，正常目标是一键复制后直接粘贴为完整公式。
 

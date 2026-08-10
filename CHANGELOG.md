@@ -4,6 +4,32 @@ All notable changes to ChatGPT_Latex are documented here. Dates use ISO 8601.
 
 本文件记录 ChatGPT_Latex 的重要变更，日期使用 ISO 8601 格式。
 
+## [1.1.2] - 2026-08-10
+
+### Fixed / 修复
+
+- Treat neutral molecular formulas, uppercase charged abbreviations, and standalone script fragments emitted by the current ChatGPT renderer as Word text with semantic scripts instead of MathML.
+- 将中性分子式、带电大写缩写及新版 ChatGPT 拆分渲染的独立上下标片段按带语义上下标的 Word 文字处理，不再转为 MathML。
+- Remove formula outlines, hover actions, and double-click editing from text-like script fragments while preserving formula controls for genuine mathematical expressions.
+- 文本型上下标片段不再显示公式框、悬浮操作或双击编辑器，真正的数学表达式仍保留公式操作。
+- Preserve standalone text scripts as `<sub>`/`<sup>` runs in both mixed selections and text-only selections so Word does not receive placeholder MathML boxes.
+- 混合选区和纯文本选区均将独立上下标保留为 `<sub>`/`<sup>`，避免 Word 收到可能产生占位方框的 MathML。
+
+### Performance / 性能
+
+- Cache each formula element's normalized source classification and only reclassify it when the source changes; no additional prose scanning was introduced.
+- 缓存每个公式元素的规范化源码分类，仅在源码变化时重新分类；未增加正文后台扫描。
+
+### Security / 安全
+
+- Audited tracked source and release files; no credentials, personal paths, browser data, experiment-specific identifiers, telemetry, or remote content-upload path are included.
+- 审计受版本控制源码和发布文件；未包含凭据、个人路径、浏览器数据、实验专属标识、遥测或远程内容上传链路。
+
+### Validation / 验证
+
+- Passed 29 unit tests, extension validation, JavaScript syntax checks, dependency audit, and isolated browser coverage for `_2`, `^+`, and combined subscript/charge fragments.
+- 通过 29 项单元测试、扩展校验、JavaScript 语法检查、依赖审计，以及 `_2`、`^+` 和下标/电荷组合片段的隔离浏览器验证。
+
 ## [1.1.1] - 2026-08-10
 
 ### Added / 新增
@@ -102,6 +128,7 @@ All notable changes to ChatGPT_Latex are documented here. Dates use ISO 8601.
 - Added automated source checks, manifest/localization validation, unit tests, and extension fixtures.
 - 新增源码语法检查、Manifest/本地化校验、单元测试和扩展测试页面。
 
+[1.1.2]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.2
 [1.1.1]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.1
 [1.1.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.0.0

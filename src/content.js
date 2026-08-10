@@ -59,7 +59,7 @@
   let scanScheduled = false;
   let currentSettings = { ...DEFAULT_SETTINGS };
   const pendingScanRoots = new Set();
-  const recognizedFormulas = new WeakSet();
+  const formulaClassifications = new WeakMap();
 
   function translate(key, fallback, substitutions) {
     try {
@@ -123,7 +123,7 @@
   function findFormulaFromEvent(event) {
     const path = typeof event.composedPath === "function" ? event.composedPath() : [event.target];
     for (const target of path) {
-      const formula = findFormula(target);
+      const formula = markRecognizedFormula(findFormula(target));
       if (formula) {
         return formula;
       }
@@ -194,21 +194,46 @@
     return "";
   }
 
+  function classifyFormula(formula) {
+    const latex = normalizer.normalizeLatexSource(extractLatex(formula));
+    const cached = formulaClassifications.get(formula);
+    if (cached?.latex === latex) {
+      return cached;
+    }
+
+    const classification = {
+      label: latex ? wordText.parseScientificLabelLatex(latex) : null,
+      latex
+    };
+    formulaClassifications.set(formula, classification);
+    return classification;
+  }
+
   function markRecognizedFormula(candidate) {
     const formula = canonicalFormula(candidate);
     if (!formula) {
       return null;
     }
 
-    if (recognizedFormulas.has(formula)) {
-      return formula;
+    const classification = classifyFormula(formula);
+    if (!classification.latex) {
+      formula.removeAttribute("data-wlc-recognized");
+      formula.removeAttribute("data-wlc-text-label");
+      return null;
     }
 
-    if (!formula.hasAttribute("data-wlc-recognized")) {
-      if (!extractLatex(formula).trim()) {
-        return null;
+    if (classification.label) {
+      formula.removeAttribute("data-wlc-recognized");
+      formula.removeAttribute("data-wlc-active");
+      formula.setAttribute("data-wlc-text-label", "");
+      if (activeFormula === formula) {
+        hideQuickActions();
       }
+      return null;
+    }
 
+    formula.removeAttribute("data-wlc-text-label");
+    if (!formula.hasAttribute("data-wlc-recognized")) {
       const display =
         formula.classList.contains("katex-display") ||
         formula.classList.contains("math-block") ||
@@ -219,7 +244,6 @@
       formula.setAttribute("data-wlc-recognized", display ? "display" : "inline");
     }
 
-    recognizedFormulas.add(formula);
     return formula;
   }
 
@@ -405,9 +429,9 @@
   }
 
   async function copyFormulaToWord(latex, plainTextFallback) {
-    const ion = wordText.parseSimpleIonLatex(latex);
-    if (ion) {
-      await writeWordClipboard(buildInlineWordHtml(ion.html), ion.plainText);
+    const label = wordText.parseScientificLabelLatex(latex);
+    if (label) {
+      await writeWordClipboard(buildInlineWordHtml(label.html), label.plainText);
       return;
     }
 
@@ -485,7 +509,7 @@
     const formulas = [];
     const addFormula = (candidate) => {
       const formula = canonicalFormula(candidate);
-      if (formula && extractLatex(formula).trim()) {
+      if (formula && classifyFormula(formula).latex) {
         formulas.push(formula);
       }
     };
@@ -502,7 +526,7 @@
     const formulas = [];
     const addIfIntersecting = (candidate) => {
       const formula = canonicalFormula(candidate);
-      if (!formula || !extractLatex(formula).trim()) {
+      if (!formula || !classifyFormula(formula).latex) {
         return;
       }
 
@@ -542,7 +566,9 @@
     let node = walker.nextNode();
     while (node) {
       const parent = node.parentElement;
-      if (!parent?.closest(FORMULA_SELECTOR)) {
+      const formula = canonicalFormula(parent?.closest(FORMULA_SELECTOR));
+      const insideEquation = formula && !classifyFormula(formula).label;
+      if (!insideEquation) {
         try {
           if (range.intersectsNode(node)) {
             let start = 0;
@@ -566,6 +592,19 @@
     }
 
     return false;
+  }
+
+  function expandTextLabelBoundaries(range) {
+    const expanded = range.cloneRange();
+    const startLabel = elementFromNode(range.startContainer)?.closest("[data-wlc-text-label]");
+    const endLabel = elementFromNode(range.endContainer)?.closest("[data-wlc-text-label]");
+    if (startLabel) {
+      expanded.setStartBefore(startLabel);
+    }
+    if (endLabel) {
+      expanded.setEndAfter(endLabel);
+    }
+    return expanded;
   }
 
   function fragmentToPlainText(fragment) {
@@ -624,16 +663,18 @@
     }
 
     const formulaValues = formulas.map((formula) => {
-      const latex = normalizer.normalizeLatexSource(extractLatex(formula));
+      const classification = classifyFormula(formula);
+      const latex = classification.latex;
       if (!latex) {
         throw new Error("No LaTeX source found");
       }
 
-      const ion = wordText.parseSimpleIonLatex(latex);
       return {
         latex,
-        ion,
-        wordLatex: ion ? ion.plainText : normalizer.convertLatexForWord(latex).latex
+        label: classification.label,
+        wordLatex: classification.label
+          ? classification.label.plainText
+          : normalizer.convertLatexForWord(latex).latex
       };
     });
 
@@ -645,8 +686,8 @@
     });
 
     const formulaHtmlValues = await Promise.all(
-      formulaValues.map((formula) => formula.ion
-        ? formula.ion.html
+      formulaValues.map((formula) => formula.label
+        ? formula.label.html
         : renderFormulaMathml(formula.latex))
     );
 
@@ -664,10 +705,11 @@
       throw new Error("Rich clipboard writing is unavailable");
     }
 
-    const formulas = formulaRootsInRange(range);
+    const copyRange = expandTextLabelBoundaries(range);
+    const formulas = formulaRootsInRange(copyRange);
     const payload = formulas.length > 0
-      ? await buildMixedSelectionPayload(range, formulas)
-      : wordText.buildSelectionPayload(range, document, {
+      ? await buildMixedSelectionPayload(copyRange, formulas)
+      : wordText.buildSelectionPayload(copyRange, document, {
         removeBoldFormatting: currentSettings.removeBoldFormatting,
         matchWordFormatting: currentSettings.matchWordFormatting
       });
@@ -700,7 +742,8 @@
       return false;
     }
 
-    return formulas.length > 0
+    const containsEquation = formulas.some((formula) => !classifyFormula(formula).label);
+    return containsEquation
       ? currentSettings.formulaRecognition && currentSettings.textRecognition
       : currentSettings.textRecognition;
   }

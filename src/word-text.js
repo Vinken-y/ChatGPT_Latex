@@ -127,8 +127,140 @@
     }).join("");
   }
 
-  function parseSimpleIonLatex(input) {
-    let value = unicodeScriptsToLatex(String(input || ""))
+  function splitTerminalCharge(value) {
+    const match = value.match(/\^(?:\{([^{}]+)\}|([+\-−]))$/);
+    if (!match) {
+      return { body: value, charge: "" };
+    }
+
+    const source = match[1] ?? match[2];
+    const magnitudeFirst = source.match(/^(\d*)([+\-−])$/);
+    const signFirst = source.match(/^([+\-−])(\d*)$/);
+    if (!magnitudeFirst && !signFirst) {
+      return null;
+    }
+
+    const magnitude = magnitudeFirst ? magnitudeFirst[1] : signFirst[2];
+    const sign = (magnitudeFirst ? magnitudeFirst[2] : signFirst[1]).replace("-", "−");
+    return {
+      body: value.slice(0, match.index),
+      charge: `${magnitude}${sign}`
+    };
+  }
+
+  function readLabelSubscript(value, position) {
+    if (value[position] === "_") {
+      position += 1;
+      if (value[position] === "{") {
+        const closingIndex = findClosingBrace(value, position);
+        if (closingIndex < 0) {
+          return null;
+        }
+        const subscript = value.slice(position + 1, closingIndex);
+        return /^\d+$/.test(subscript)
+          ? { position: closingIndex + 1, subscript }
+          : null;
+      }
+
+      const match = value.slice(position).match(/^(\d+)/);
+      return match
+        ? { position: position + match[1].length, subscript: match[1] }
+        : null;
+    }
+
+    const match = value.slice(position).match(/^(\d+)/);
+    return match
+      ? { position: position + match[1].length, subscript: match[1] }
+      : { position, subscript: "" };
+  }
+
+  function parseLabelRuns(body, tokenPattern, isValidToken) {
+    const runs = [];
+    let position = 0;
+
+    while (position < body.length) {
+      const tokenMatch = body.slice(position).match(tokenPattern);
+      if (!tokenMatch || !isValidToken(tokenMatch[1])) {
+        return null;
+      }
+
+      const text = tokenMatch[1];
+      position += text.length;
+      const script = readLabelSubscript(body, position);
+      if (!script) {
+        return null;
+      }
+      position = script.position;
+      runs.push({ text, subscript: script.subscript });
+    }
+
+    return runs.length > 0 ? runs : null;
+  }
+
+  function buildScientificLabel(runs, charge) {
+    const bodyHtml = runs.map((run) =>
+      run.text + (run.subscript ? `<sub>${run.subscript}</sub>` : "")
+    ).join("");
+    const bodyText = runs.map((run) => run.text + run.subscript).join("");
+    const chargeHtml = charge ? `<sup>${charge}</sup>` : "";
+
+    return {
+      html: `<span>${bodyHtml}${chargeHtml}</span>`,
+      plainText: `${bodyText}${charge}`
+    };
+  }
+
+  function readStandaloneScript(value, position) {
+    if (value[position] === "{") {
+      const closingIndex = findClosingBrace(value, position);
+      if (closingIndex < 0) {
+        return null;
+      }
+      const text = value.slice(position + 1, closingIndex);
+      return /^[A-Za-z0-9+\-−=()]+$/.test(text)
+        ? { position: closingIndex + 1, text }
+        : null;
+    }
+
+    const text = value[position];
+    return text && /^[A-Za-z0-9+\-−=()]$/.test(text)
+      ? { position: position + 1, text }
+      : null;
+  }
+
+  function parseStandaloneTextScripts(value) {
+    if (!value || !/^[\^_]/.test(value)) {
+      return null;
+    }
+
+    const runs = [];
+    let position = 0;
+    while (position < value.length) {
+      const marker = value[position];
+      if (marker !== "^" && marker !== "_") {
+        return null;
+      }
+      const script = readStandaloneScript(value, position + 1);
+      if (!script) {
+        return null;
+      }
+      runs.push({
+        mode: marker === "^" ? "sup" : "sub",
+        text: script.text.replace(/-/g, "−")
+      });
+      position = script.position;
+    }
+
+    return {
+      html: `<span>${runs.map((run) => `<${run.mode}>${run.text}</${run.mode}>`).join("")}</span>`,
+      plainText: runs.map((run) => run.text).join("")
+    };
+  }
+
+  function parseScientificLabelLatex(input) {
+    const source = String(input || "");
+    const usesTextFormatting = /\\(?:mathrm|text)\s*\{|\\rm\b/.test(source);
+    let value = unicodeScriptsToLatex(source)
       .replace(/\\(?:!|,|:|;|quad|qquad)/g, "")
       .replace(/\s+/g, "");
     value = unwrapIonFormatting(value);
@@ -137,72 +269,43 @@
       value = value.slice(1, -1);
     }
 
-    const chargeMatch = value.match(/\^(?:\{([0-9]*)([+\-−])\}|([0-9]*)([+\-−]))$/);
-    if (!chargeMatch) {
+    const standaloneScripts = parseStandaloneTextScripts(value);
+    if (standaloneScripts) {
+      return standaloneScripts;
+    }
+
+    const terminal = splitTerminalCharge(value);
+    if (!terminal || !terminal.body) {
       return null;
     }
 
-    const chargeMagnitude = chargeMatch[1] ?? chargeMatch[3] ?? "";
-    const chargeSign = (chargeMatch[2] ?? chargeMatch[4]).replace("-", "−");
-    const body = value.slice(0, chargeMatch.index);
-    const runs = [];
-    let position = 0;
-
-    while (position < body.length) {
-      const elementMatch = body.slice(position).match(/^([A-Z][a-z]?)/);
-      if (!elementMatch || !CHEMICAL_ELEMENTS.has(elementMatch[1])) {
-        return null;
-      }
-
-      const element = elementMatch[1];
-      position += element.length;
-      let subscript = "";
-
-      if (body[position] === "_") {
-        position += 1;
-        if (body[position] === "{") {
-          const closingIndex = findClosingBrace(body, position);
-          if (closingIndex < 0) {
-            return null;
-          }
-          subscript = body.slice(position + 1, closingIndex);
-          position = closingIndex + 1;
-        } else {
-          const subscriptMatch = body.slice(position).match(/^([0-9]+)/);
-          if (!subscriptMatch) {
-            return null;
-          }
-          subscript = subscriptMatch[1];
-          position += subscript.length;
-        }
-      } else {
-        const subscriptMatch = body.slice(position).match(/^([0-9]+)/);
-        if (subscriptMatch) {
-          subscript = subscriptMatch[1];
-          position += subscript.length;
-        }
-      }
-
-      if (subscript && !/^\d+$/.test(subscript)) {
-        return null;
-      }
-      runs.push({ element, subscript });
+    const chemicalRuns = parseLabelRuns(
+      terminal.body,
+      /^([A-Z][a-z]?)/,
+      (token) => CHEMICAL_ELEMENTS.has(token)
+    );
+    if (
+      chemicalRuns &&
+      (
+        terminal.charge ||
+        chemicalRuns.length > 1 ||
+        (usesTextFormatting && chemicalRuns.some((run) => run.subscript))
+      )
+    ) {
+      return buildScientificLabel(chemicalRuns, terminal.charge);
     }
 
-    if (runs.length === 0) {
-      return null;
+    const acronymRuns = parseLabelRuns(terminal.body, /^([A-Z])/, () => true);
+    const acronymLength = acronymRuns?.reduce((total, run) => total + run.text.length, 0) || 0;
+    if (acronymRuns && acronymLength >= 2 && (terminal.charge || usesTextFormatting)) {
+      return buildScientificLabel(acronymRuns, terminal.charge);
     }
 
-    const charge = `${chargeMagnitude}${chargeSign}`;
-    const bodyHtml = runs.map((run) =>
-      run.element + (run.subscript ? `<sub>${run.subscript}</sub>` : "")
-    ).join("");
-    const bodyText = runs.map((run) => run.element + run.subscript).join("");
+    return null;
+  }
 
-    return {
-      html: `<span>${bodyHtml}<sup>${charge}</sup></span>`,
-      plainText: `${bodyText}${charge}`
-    };
+  function parseSimpleIonLatex(input) {
+    return parseScientificLabelLatex(input);
   }
 
   function replaceTextNode(node, documentRef) {
@@ -428,7 +531,9 @@
     convertUnicodeScripts,
     getScriptToken,
     normalizeForWordDestination,
+    parseScientificLabelLatex,
     parseSimpleIonLatex,
+    parseStandaloneTextScripts,
     removeSourceBold,
     sanitizeElement,
     splitUnicodeScripts

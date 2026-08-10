@@ -47,6 +47,10 @@
     <span role="math" aria-label="x_{n+1} = x_n + 1" data-math-source="x_{n+1} = x_n + 1" data-client-katex-layout style="display: block;">
       <span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true">xₙ₊₁ = xₙ + 1</span></span></span>
     </span>
+    <p>Scientific text label:</p>
+    C<span id="scientific-text-label" role="math" data-math-source="_2">
+      <span class="katex"><span class="katex-html" aria-hidden="true">₂</span></span>
+    </span>
     <span id="dynamic-math" role="math">y₁</span>
     <script>
       globalThis.__wlcStorageListeners = [];
@@ -107,6 +111,18 @@
         probe.dataset.textActionsVisible = String(
           Boolean(document.querySelector("#chatgpt-latex-selection-actions.is-visible"))
         );
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        document.querySelector("#chatgpt-latex-quick-actions")?.classList.remove("is-visible");
+        const label = document.getElementById("scientific-text-label");
+        label.dispatchEvent(new PointerEvent("pointerover", { bubbles: true, composed: true }));
+        label.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, composed: true }));
+        probe.dataset.labelRecognizedAsFormula = String(label.hasAttribute("data-wlc-recognized"));
+        probe.dataset.labelClassifiedAsText = String(label.hasAttribute("data-wlc-text-label"));
+        probe.dataset.labelQuickActionsVisible = String(Boolean(
+          document.querySelector("#chatgpt-latex-quick-actions.is-visible")
+        ));
+        probe.dataset.labelDialogOpen = String(Boolean(document.getElementById("chatgpt-latex-root")));
         document.body.appendChild(probe);
       }, 900);
     </script>

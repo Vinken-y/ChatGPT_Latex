@@ -16,7 +16,7 @@ ChatGPT_Latex is a lightweight Manifest V3 extension for moving scientific conte
 - Shows one shared hover toolbar with **Copy to Word** as the primary action. **Copy LaTeX** can be enabled from the extension settings.
 - Copies a selection containing both prose and formulas in one Word-ready rich clipboard payload; it does not scan prose in the background.
 - Converts generic Unicode scientific notation such as `A⁺`, `B₂`, `C₃⁻`, `x⁻¹`, and `y⁻²` into real Word superscript/subscript runs while preserving semantic rich-text structure.
-- Treats simple charged chemical labels as Word text with `<sub>` element counts and `<sup>` charge runs, while full equations remain MathML equations.
+- Treats simple molecular formulas and charged scientific labels as Word text with semantic `<sub>`/`<sup>` scripts and excludes them from formula hover/edit controls, while equations and mathematical expressions remain MathML.
 - Keeps formula-only and mixed-selection workflows separate: formula-only selections use the formula toolbar, while mixed selections use **Copy to Word**.
 - Removes physical line breaks, indentation, comments, zero-width characters, and outer math delimiters without removing LaTeX row separators such as `\\`.
 - Copies a complete equation to Word as MathML-rich clipboard data, with normalized Word-linear LaTeX as the plain-text fallback.
@@ -39,11 +39,11 @@ The extension reads formula-related DOM on these explicitly matched sites. Selec
 
 ### GitHub release
 
-1. Download `ChatGPT_Latex-v1.1.1.zip` from the [v1.1.1 release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.1).
+1. Download `ChatGPT_Latex-v1.1.2.zip` from the [v1.1.2 release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.2).
 2. Extract the archive.
 3. Open `chrome://extensions` or `edge://extensions`.
 4. Enable **Developer mode**.
-5. Select **Load unpacked** and choose the extracted `ChatGPT_Latex-v1.1.1` directory.
+5. Select **Load unpacked** and choose the extracted `ChatGPT_Latex-v1.1.2` directory.
 
 ### Source checkout
 
@@ -76,7 +76,7 @@ A browser extension cannot inspect the font or paragraph spacing before the inse
 
 ### What Copy to Word does
 
-**Copy to Word** copies the entire equation, not only its displayed characters. The primary clipboard format is MathML inside `text/html`; supported desktop versions of Word can consume this rich format and create a professional equation when pasted into the document body. In a mixed selection, each full equation is placed at its original text position and simple charged chemical labels use semantic `<sub>`/`<sup>` text runs instead of equation markup. Normalized Word-linear LaTeX is included as `text/plain` fallback data.
+**Copy to Word** copies the entire equation, not only its displayed characters. The primary clipboard format is MathML inside `text/html`; supported desktop versions of Word can consume this rich format and create a professional equation when pasted into the document body. In a mixed selection, each full equation is placed at its original text position, while simple molecular formulas and charged scientific labels use semantic `<sub>`/`<sup>` text runs instead of equation markup. Normalized Word-linear LaTeX is included as `text/plain` fallback data.
 
 If a Word configuration ignores the rich clipboard format, press `Alt` + `=` to insert an equation, ensure the equation input mode is LaTeX, paste, and choose **Professional** conversion. That manual sequence is a fallback, not the intended one-click path.
 
