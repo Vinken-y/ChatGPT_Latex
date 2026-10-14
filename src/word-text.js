@@ -56,6 +56,10 @@
   ]);
   const SAFE_HREF = /^(?:https?:|mailto:|tel:|#|\/)/i;
   const WORD_NORMAL_BLOCK_TAGS = new Set(["BLOCKQUOTE", "DIV", "LI", "P"]);
+  const WORD_BLOCK_TAGS = new Set([
+    "BLOCKQUOTE", "BODY", "DIV", "H1", "H2", "H3", "H4", "H5", "H6",
+    "LI", "OL", "P", "TABLE", "TBODY", "TD", "TFOOT", "TH", "THEAD", "TR", "UL"
+  ]);
 
   function getScriptToken(character) {
     const value = SCRIPT_CHARACTERS.get(character);
@@ -304,6 +308,56 @@
     return null;
   }
 
+  function toUnicodeSuperscript(value) {
+    const characters = {
+      "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴",
+      "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹",
+      "+": "⁺", "-": "⁻", "−": "⁻"
+    };
+    return Array.from(value, (character) => characters[character] || character).join("");
+  }
+
+  function parseSimpleScalarLatex(input) {
+    const value = unicodeScriptsToLatex(String(input || ""))
+      .replace(/\\(?:!|,|:|;|quad|qquad)/g, "")
+      .replace(/\s+/g, "");
+
+    const signedTolerance = value.match(/^(?:\\pm|±)(\d+(?:\.\d+)?|\.\d+)$/);
+    if (signedTolerance) {
+      const plainText = `±${signedTolerance[1]}`;
+      return { html: `<span>${plainText}</span>`, plainText };
+    }
+
+    const numericComparison = value.match(
+      /^(\\leqslant|\\geqslant|\\leq|\\geq|\\le|\\ge|≤|≥)([+\-−]?(?:\d+(?:\.\d+)?|\.\d+))$/
+    );
+    if (numericComparison) {
+      const symbol = /(?:le|≤)/.test(numericComparison[1]) ? "≤" : "≥";
+      const plainText = `${symbol}${numericComparison[2].replace(/-/g, "−")}`;
+      return { html: `<span>${plainText}</span>`, plainText };
+    }
+
+    const epsilonAssignment = value.match(
+      /^(?:\\varepsilon|\\epsilon|ε)=([+\-−]?(?:\d+(?:\.\d+)?|\.\d+))(?:\^(?:\{([+\-−]?\d+)\}|([+\-−]?\d+)))?$/
+    );
+    if (!epsilonAssignment) {
+      return null;
+    }
+
+    const base = epsilonAssignment[1].replace(/-/g, "−");
+    const exponent = (epsilonAssignment[2] ?? epsilonAssignment[3] ?? "").replace(/-/g, "−");
+    const exponentHtml = exponent ? `<sup>${exponent}</sup>` : "";
+    const exponentText = exponent ? toUnicodeSuperscript(exponent) : "";
+    return {
+      html: `<span>ε = ${base}${exponentHtml}</span>`,
+      plainText: `ε = ${base}${exponentText}`
+    };
+  }
+
+  function parseWordTextLatex(input) {
+    return parseScientificLabelLatex(input) || parseSimpleScalarLatex(input);
+  }
+
   function parseSimpleIonLatex(input) {
     return parseScientificLabelLatex(input);
   }
@@ -471,6 +525,54 @@
     return container;
   }
 
+  function trimBlockBoundaryWhitespace(container) {
+    const parents = [container, ...container.querySelectorAll("*")];
+    parents.forEach((parent) => {
+      if (!WORD_BLOCK_TAGS.has(parent.tagName)) {
+        return;
+      }
+
+      const children = Array.from(parent.childNodes);
+      children.forEach((child, index) => {
+        if (child.nodeType !== 3 || !/^[\t\n\f\r ]+$/.test(child.nodeValue || "")) {
+          return;
+        }
+
+        const previous = children[index - 1];
+        const next = children[index + 1];
+        const atBoundary = index === 0 || index === children.length - 1;
+        const nextToBlock = (previous?.nodeType === 1 && WORD_BLOCK_TAGS.has(previous.tagName)) ||
+          (next?.nodeType === 1 && WORD_BLOCK_TAGS.has(next.tagName));
+        if (atBoundary || nextToBlock) {
+          child.remove();
+        }
+      });
+    });
+    return container;
+  }
+
+  function normalizeWordTextWhitespace(container, documentRef) {
+    const nodeFilter = documentRef.defaultView?.NodeFilter || globalThis.NodeFilter;
+    const walker = documentRef.createTreeWalker(
+      container,
+      nodeFilter ? nodeFilter.SHOW_TEXT : 4
+    );
+    const textNodes = [];
+    let node = walker.nextNode();
+    while (node) {
+      textNodes.push(node);
+      node = walker.nextNode();
+    }
+
+    textNodes.forEach((textNode) => {
+      if (textNode.parentElement?.closest("pre, code, samp")) {
+        return;
+      }
+      textNode.nodeValue = (textNode.nodeValue || "").replace(/[\r\n\f]+/g, " ");
+    });
+    return container;
+  }
+
   function buildWordHtml(fragment, documentRef, options) {
     const settings = {
       matchWordFormatting: false,
@@ -481,6 +583,8 @@
     container.appendChild(fragment);
     sanitizeElement(container);
     convertUnicodeScripts(container, documentRef);
+    normalizeWordTextWhitespace(container, documentRef);
+    trimBlockBoundaryWhitespace(container);
     if (settings.removeBoldFormatting) {
       removeSourceBold(container);
     }
@@ -532,8 +636,10 @@
     getScriptToken,
     normalizeForWordDestination,
     parseScientificLabelLatex,
+    parseSimpleScalarLatex,
     parseSimpleIonLatex,
     parseStandaloneTextScripts,
+    parseWordTextLatex,
     removeSourceBold,
     sanitizeElement,
     splitUnicodeScripts

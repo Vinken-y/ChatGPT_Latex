@@ -74,6 +74,7 @@
 
     let mathml = match[0]
       .replace(/\s*stretchy="false"/gi, "")
+      .replace(/\s*separator="true"/gi, "")
       .replace(/\s*display="[^"]*"/gi, "")
       .replace(/<semantics>([\s\S]*?)<annotation[^>]*>[\s\S]*?<\/annotation><\/semantics>/i, "$1")
       .replace(

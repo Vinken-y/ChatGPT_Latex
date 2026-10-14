@@ -4,6 +4,39 @@ All notable changes to ChatGPT_Latex are documented here. Dates use ISO 8601.
 
 本文件记录 ChatGPT_Latex 的重要变更，日期使用 ISO 8601 格式。
 
+## [1.2.0] - 2026-10-15
+
+### Fixed / 修复
+
+- Recognize the current ChatGPT writing panel's `chatgpt-writing-block` marker alongside the legacy layout and copy from a detached selection snapshot across editor transactions.
+- 兼容新版 ChatGPT 的 `chatgpt-writing-block` 标识及旧版布局；使用脱离编辑器的选区快照，避免编辑器重建节点时丢失复制内容。
+
+- Preserve an existing ordinary U+0020 space after an inline MathML equation with a Word spacer run only when prose follows; punctuation and paragraph endings remain unspaced.
+- 行内 MathML 公式后接正文时，以 Word spacer run 保留原有的普通 U+0020 空格；公式后接标点或位于段尾时不增加空格。
+- Remove non-essential MathML separator attributes from punctuation and normalize physical HTML line breaks around copied equations before Word paste.
+- 移除标点 MathML 中非必要的 separator 属性，并在粘贴到 Word 前规范化公式周围的 HTML 物理换行。
+
+### Added / 新增
+
+- Support Word-ready copying from selections inside ChatGPT writing blocks while continuing to suppress the action in chat composers and ordinary editable controls.
+- 支持从 ChatGPT 写作框选区复制 Word 富文本，同时继续屏蔽聊天输入框和普通可编辑控件中的插件操作。
+- Capture and start writing-block selection copying on pointer press so ProseMirror cannot clear the live range before clipboard conversion begins.
+- 在按钮按下瞬间捕获并开始复制写作框选区，避免 ProseMirror 在剪贴板转换前清除实时选区。
+- Treat narrowly scoped epsilon assignments with numeric exponents, plus-minus numeric tolerances, and numeric comparison thresholds as semantic Word text instead of equations.
+- 将受限形式的 epsilon 数值赋值、正负数值容差和数值比较阈值按语义化 Word 文本处理，不再识别为公式。
+
+### Validation / 验证
+
+- Added unit and isolated-browser coverage for formula-to-prose spaces, punctuation boundaries, and text-only scalar notation.
+- 新增公式到正文空格、标点边界及纯文本短数值表达式的单元测试和隔离浏览器验证。
+- Verified editable and read-only current writing panels, legacy panels, text-only copying, and selection snapshots after editor node replacement; all 32 unit tests passed.
+- 验证新版可编辑/只读写作面板、旧版面板、纯文本复制，以及编辑器重建节点后的选区快照；32 项单元测试通过。
+
+### Security / 安全
+
+- Updated the bundled KaTeX runtime to 0.19.0 to address GHSA-238p-pmpm-9mq7; production dependency audit reports zero vulnerabilities.
+- 内置 KaTeX 更新至 0.19.0，修复 GHSA-238p-pmpm-9mq7；生产依赖审计为 0 个漏洞。
+
 ## [1.1.2] - 2026-08-10
 
 ### Fixed / 修复
@@ -128,6 +161,7 @@ All notable changes to ChatGPT_Latex are documented here. Dates use ISO 8601.
 - Added automated source checks, manifest/localization validation, unit tests, and extension fixtures.
 - 新增源码语法检查、Manifest/本地化校验、单元测试和扩展测试页面。
 
+[1.2.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.2.0
 [1.1.2]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.2
 [1.1.1]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.1
 [1.1.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.0

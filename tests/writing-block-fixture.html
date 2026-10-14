@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Writing block selection fixture</title>
+    <link rel="stylesheet" href="../src/content.css">
+    <style>
+      body { font: 18px/1.55 Arial, sans-serif; margin: 40px; }
+      [data-testid="chatgpt-writing-block"], [data-testid="writing-block-container"] { border: 1px solid #ddd; padding: 24px; }
+      [contenteditable="true"] { outline: none; }
+    </style>
+  </head>
+  <body>
+    <div data-testid="chatgpt-writing-block">
+      <div id="writing-editor" contenteditable="true" class="ProseMirror" role="textbox">
+        <p id="writing-text"><strong>Document heading.</strong> Sample B₂ contains <span role="math" data-math-source="x^2"><span class="katex"><span class="katex-html" aria-hidden="true">x²</span></span></span> and ordinary prose.</p>
+      </div>
+    </div>
+    <div id="chat-composer" contenteditable="true"><p id="composer-text">Chat composer text must stay blocked.</p></div>
+
+    <script>
+      globalThis.__wlcWritingStorageListeners = [];
+      globalThis.chrome = {
+        i18n: { getMessage() { return ""; } },
+        runtime: {
+          lastError: null,
+          sendMessage(message, callback) {
+            callback({
+              ok: true,
+              mathml: '<math xmlns="http://www.w3.org/1998/Math/MathML"><msup><mi>x</mi><mn>2</mn></msup></math>'
+            });
+          }
+        },
+        storage: {
+          local: { get(defaults, callback) { callback(defaults); } },
+          onChanged: { addListener(listener) { globalThis.__wlcWritingStorageListeners.push(listener); } }
+        }
+      };
+      globalThis.ClipboardItem = class ClipboardItem {
+        constructor(data) { this.data = data; }
+      };
+      Object.defineProperty(navigator, "clipboard", {
+        configurable: true,
+        value: {
+          write(items) {
+            globalThis.__wlcWritingClipboardItems = items;
+            return Promise.resolve();
+          }
+        }
+      });
+    </script>
+    <script src="../src/latex-normalizer.js"></script>
+    <script src="../src/word-mathml.js"></script>
+    <script src="../src/word-text.js"></script>
+    <script src="../src/content.js"></script>
+    <script>
+      window.addEventListener("load", async () => {
+        const options = new URLSearchParams(location.search);
+        const editor = document.getElementById("writing-editor");
+        if (options.get("layout") === "legacy") {
+          editor.parentElement.dataset.testid = "writing-block-container";
+        }
+        if (options.get("mode") === "readonly") {
+          editor.setAttribute("contenteditable", "false");
+        }
+        if (options.has("plain")) {
+          document.getElementById("writing-text").innerHTML = "<strong>Document heading.</strong> Sample B₂ and A⁺ contain ordinary prose.";
+        }
+        const probe = document.createElement("output");
+        probe.id = "writing-block-probe";
+        probe.hidden = true;
+        document.body.appendChild(probe);
+        const selection = window.getSelection();
+
+        const writingRange = document.createRange();
+        writingRange.selectNodeContents(document.getElementById("writing-text"));
+        selection.removeAllRanges();
+        selection.addRange(writingRange);
+        document.dispatchEvent(new Event("selectionchange"));
+        await new Promise((resolve) => window.setTimeout(resolve, 160));
+        const writingAction = document.querySelector("#chatgpt-latex-selection-actions.is-visible button");
+        probe.dataset.writingActionVisible = String(Boolean(writingAction));
+        writingAction?.dispatchEvent(new PointerEvent("pointerdown", {
+          bubbles: true,
+          cancelable: true,
+          composed: true
+        }));
+        editor.innerHTML = "<p id='writing-text'>Editor transaction replaced the original document nodes.</p>";
+        selection.removeAllRanges();
+        document.dispatchEvent(new Event("selectionchange"));
+        writingAction?.click();
+        await new Promise((resolve) => window.setTimeout(resolve, 500));
+        const item = globalThis.__wlcWritingClipboardItems?.[0];
+        const html = item ? await item.data["text/html"].text() : "";
+        probe.dataset.writingHasText = String(html.includes("Document heading"));
+        probe.dataset.writingMathCount = String((html.match(/<math\b/g) || []).length);
+        probe.dataset.writingHasSubscript = String(html.includes("<sub>2</sub>"));
+        probe.dataset.snapshotPreserved = String(!html.includes("Editor transaction replaced"));
+        probe.dataset.toastText = document.getElementById("chatgpt-latex-toast")?.textContent || "";
+        probe.dataset.toastError = String(Boolean(
+          document.getElementById("chatgpt-latex-toast")?.classList.contains("is-error")
+        ));
+
+        const composerRange = document.createRange();
+        composerRange.selectNodeContents(document.getElementById("composer-text"));
+        selection.removeAllRanges();
+        selection.addRange(composerRange);
+        document.dispatchEvent(new Event("selectionchange"));
+        await new Promise((resolve) => window.setTimeout(resolve, 160));
+        probe.dataset.composerActionVisible = String(Boolean(
+          document.querySelector("#chatgpt-latex-selection-actions.is-visible")
+        ));
+
+        const crossRange = document.createRange();
+        crossRange.setStart(document.getElementById("writing-text").firstChild, 0);
+        crossRange.setEnd(document.getElementById("composer-text").firstChild, 4);
+        selection.removeAllRanges();
+        selection.addRange(crossRange);
+        document.dispatchEvent(new Event("selectionchange"));
+        await new Promise((resolve) => window.setTimeout(resolve, 160));
+        probe.dataset.crossActionVisible = String(Boolean(
+          document.querySelector("#chatgpt-latex-selection-actions.is-visible")
+        ));
+      });
+    </script>
+  </body>
+</html>

@@ -68,6 +68,17 @@ test("removes physical line breaks after an equals sign in a ratio", () => {
   );
 });
 
+test("normalizes multiline argmax source without preserving physical line breaks", () => {
+  const source = String.raw`S_i^{(k)}
+=
+\operatorname*{arg\,max}_{s\in\{\mathrm{A},\,\mathrm{B},\,\mathrm{C}\}}
+n_{i,s}^{(k)}`;
+  assert.equal(
+    normalizeLatexSource(source),
+    String.raw`S_i^{(k)} = \operatorname*{arg\,max}_{s\in\{\mathrm{A},\,\mathrm{B},\,\mathrm{C}\}} n_{i,s}^{(k)}`
+  );
+});
+
 test("removes zero-width characters and normalizes non-breaking spaces", () => {
   assert.equal(normalizeLatexSource("a\u200b\u00a0 +\u00a0b"), "a + b");
 });

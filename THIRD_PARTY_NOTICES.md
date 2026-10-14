@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-## KaTeX 0.16.47
+## KaTeX 0.19.0
 
 This extension bundles the minified KaTeX browser runtime at
 `src/vendor/katex.min.js` to convert edited LaTeX into MathML for Microsoft
@@ -11,7 +11,7 @@ KaTeX is distributed under the MIT License. The license text is included at
 
 Project: https://katex.org/
 
-Source package: https://registry.npmjs.org/katex/-/katex-0.16.47.tgz
+Source package: https://registry.npmjs.org/katex/-/katex-0.19.0.tgz
 
 Vendored file SHA-256:
-`a29d2961d3146de5949d78ac7c1a9d93ae54955bad22a6db4fbe836e88e8bf48`
+`103a53763cc033bba8d175bf3f0ba597c3505c9b6747dd3f2c7bc2a6bfcc8ae7`

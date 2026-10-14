@@ -11,7 +11,7 @@ const {
 } = require("../src/word-mathml.js");
 
 test("uses the audited vendored KaTeX release", () => {
-  assert.equal(katex.version, "0.16.47");
+  assert.equal(katex.version, "0.19.0");
 });
 
 test("renders a fraction as MathML for Word", () => {
@@ -23,6 +23,18 @@ test("renders a fraction as MathML for Word", () => {
   assert.match(mathml, /<mfrac>/);
   assert.doesNotMatch(mathml, /<annotation/);
   assert.doesNotMatch(mathml, /\\frac/);
+});
+
+test("renders argmax conditions as an under-scripted Word equation", () => {
+  const latex = String.raw`S_i^{(k)}=\operatorname*{arg\,max}_{s\in\{\mathrm{A},\,\mathrm{B},\,\mathrm{C}\}} n_{i,s}^{(k)}`;
+  const mathml = latexToMathml(latex, katex);
+
+  assert.match(mathml, /<munder|<munderover/);
+  assert.match(mathml, /arg/);
+  assert.match(mathml, /max/);
+  assert.match(mathml, /<mo>,<\/mo>/);
+  assert.doesNotMatch(mathml, /separator="true"/);
+  assert.doesNotMatch(mathml, /\\operatorname/);
 });
 
 test("renders standard LaTeX matrix environments before Word clipboard output", () => {

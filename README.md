@@ -15,8 +15,12 @@ ChatGPT_Latex is a lightweight Manifest V3 extension for moving scientific conte
 - Detects KaTeX, MathJax, native MathML, `data-math`, and current ChatGPT `data-math-source` formulas.
 - Shows one shared hover toolbar with **Copy to Word** as the primary action. **Copy LaTeX** can be enabled from the extension settings.
 - Copies a selection containing both prose and formulas in one Word-ready rich clipboard payload; it does not scan prose in the background.
+- Supports selections inside ChatGPT writing blocks without enabling copy actions in the chat composer or ordinary editable controls.
 - Converts generic Unicode scientific notation such as `A⁺`, `B₂`, `C₃⁻`, `x⁻¹`, and `y⁻²` into real Word superscript/subscript runs while preserving semantic rich-text structure.
 - Treats simple molecular formulas and charged scientific labels as Word text with semantic `<sub>`/`<sup>` scripts and excludes them from formula hover/edit controls, while equations and mathematical expressions remain MathML.
+- Treats narrowly scoped epsilon assignments, plus-minus numeric tolerances, and numeric comparison thresholds as Word text, while keeping variables and general equations as MathML.
+- Preserves an existing ordinary space between an inline equation and following prose with a Word spacer run; punctuation and paragraph endings do not receive an added space.
+- Normalizes physical HTML line breaks around equations and emits punctuation as ordinary MathML operators for Word compatibility.
 - Keeps formula-only and mixed-selection workflows separate: formula-only selections use the formula toolbar, while mixed selections use **Copy to Word**.
 - Removes physical line breaks, indentation, comments, zero-width characters, and outer math delimiters without removing LaTeX row separators such as `\\`.
 - Copies a complete equation to Word as MathML-rich clipboard data, with normalized Word-linear LaTeX as the plain-text fallback.
@@ -39,11 +43,11 @@ The extension reads formula-related DOM on these explicitly matched sites. Selec
 
 ### GitHub release
 
-1. Download `ChatGPT_Latex-v1.1.2.zip` from the [v1.1.2 release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.2).
+1. Download `ChatGPT_Latex-v1.2.0.zip` from the [v1.2.0 release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.2.0).
 2. Extract the archive.
 3. Open `chrome://extensions` or `edge://extensions`.
 4. Enable **Developer mode**.
-5. Select **Load unpacked** and choose the extracted `ChatGPT_Latex-v1.1.2` directory.
+5. Select **Load unpacked** and choose the extracted `ChatGPT_Latex-v1.2.0` directory. After updating, reload the extension and refresh open chat pages.
 
 ### Source checkout
 

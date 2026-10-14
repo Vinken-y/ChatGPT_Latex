@@ -41,6 +41,7 @@
   const SELECTION_SETTLE_DELAY_MS = 48;
   const FORMULA_SLOT_PREFIX = "\uE000WLC_FORMULA_";
   const FORMULA_SLOT_SUFFIX = "_WLC\uE001";
+  const WORD_INLINE_SPACER_HTML = '<span style="mso-spacerun:yes; white-space:pre"> </span>';
   const PLAIN_TEXT_BLOCK_TAGS = new Set([
     "ADDRESS", "BLOCKQUOTE", "DIV", "H1", "H2", "H3", "H4", "H5", "H6",
     "LI", "OL", "P", "PRE", "TABLE", "TBODY", "TFOOT", "THEAD", "TR", "UL"
@@ -53,6 +54,9 @@
   let quickActionsPositionFrame = null;
   let selectionActions = null;
   let selectionRange = null;
+  let selectionSnapshot = null;
+  let selectionCopyInFlight = false;
+  let suppressNextSelectionClick = false;
   let selectionUpdateTimer = null;
   let selectionPositionFrame = null;
   let pointerSelecting = false;
@@ -202,7 +206,7 @@
     }
 
     const classification = {
-      label: latex ? wordText.parseScientificLabelLatex(latex) : null,
+      wordText: latex ? wordText.parseWordTextLatex(latex) : null,
       latex
     };
     formulaClassifications.set(formula, classification);
@@ -222,7 +226,7 @@
       return null;
     }
 
-    if (classification.label) {
+    if (classification.wordText) {
       formula.removeAttribute("data-wlc-recognized");
       formula.removeAttribute("data-wlc-active");
       formula.setAttribute("data-wlc-text-label", "");
@@ -429,9 +433,9 @@
   }
 
   async function copyFormulaToWord(latex, plainTextFallback) {
-    const label = wordText.parseScientificLabelLatex(latex);
-    if (label) {
-      await writeWordClipboard(buildInlineWordHtml(label.html), label.plainText);
+    const textPayload = wordText.parseWordTextLatex(latex);
+    if (textPayload) {
+      await writeWordClipboard(buildInlineWordHtml(textPayload.html), textPayload.plainText);
       return;
     }
 
@@ -567,7 +571,7 @@
     while (node) {
       const parent = node.parentElement;
       const formula = canonicalFormula(parent?.closest(FORMULA_SELECTOR));
-      const insideEquation = formula && !classifyFormula(formula).label;
+      const insideEquation = formula && !classifyFormula(formula).wordText;
       if (!insideEquation) {
         try {
           if (range.intersectsNode(node)) {
@@ -644,6 +648,21 @@
     return `${FORMULA_SLOT_PREFIX}${index}${FORMULA_SLOT_SUFFIX}`;
   }
 
+  function consumeWordInlineBoundarySpace(formula) {
+    const next = formula.nextSibling;
+    if (next?.nodeType !== Node.TEXT_NODE) {
+      return false;
+    }
+
+    const value = next.nodeValue || "";
+    const leadingSpace = value.match(/^[\t\n\f\r ]+(?=\S)/);
+    if (leadingSpace) {
+      next.nodeValue = value.slice(leadingSpace[0].length);
+      return true;
+    }
+    return false;
+  }
+
   function replaceFormulaSlots(html, replacements) {
     let result = html;
     replacements.forEach((replacement, index) => {
@@ -652,18 +671,17 @@
     return result;
   }
 
-  async function buildMixedSelectionPayload(range, formulas) {
-    const htmlFragment = range.cloneContents();
-    const plainFragment = range.cloneContents();
+  async function buildMixedSelectionPayload(snapshot) {
+    const htmlFragment = snapshot.fragment.cloneNode(true);
+    const plainFragment = snapshot.fragment.cloneNode(true);
     const htmlFormulas = formulaRootsInContainer(htmlFragment);
     const plainFormulas = formulaRootsInContainer(plainFragment);
 
-    if (htmlFormulas.length !== formulas.length || plainFormulas.length !== formulas.length) {
+    if (htmlFormulas.length !== snapshot.formulas.length || plainFormulas.length !== snapshot.formulas.length) {
       throw new Error("Formula selection boundaries could not be preserved");
     }
 
-    const formulaValues = formulas.map((formula) => {
-      const classification = classifyFormula(formula);
+    const formulaValues = snapshot.formulas.map((classification) => {
       const latex = classification.latex;
       if (!latex) {
         throw new Error("No LaTeX source found");
@@ -671,14 +689,18 @@
 
       return {
         latex,
-        label: classification.label,
-        wordLatex: classification.label
-          ? classification.label.plainText
+        wordText: classification.wordText,
+        wordSpaceAfter: false,
+        wordLatex: classification.wordText
+          ? classification.wordText.plainText
           : normalizer.convertLatexForWord(latex).latex
       };
     });
 
     htmlFormulas.forEach((formula, index) => {
+      if (!formulaValues[index].wordText && formula.getAttribute("data-wlc-recognized") !== "display") {
+        formulaValues[index].wordSpaceAfter = consumeWordInlineBoundarySpace(formula);
+      }
       formula.replaceWith(document.createTextNode(formulaSlot(index)));
     });
     plainFormulas.forEach((formula, index) => {
@@ -686,33 +708,43 @@
     });
 
     const formulaHtmlValues = await Promise.all(
-      formulaValues.map((formula) => formula.label
-        ? formula.label.html
+      formulaValues.map((formula) => formula.wordText
+        ? formula.wordText.html
         : renderFormulaMathml(formula.latex))
+    );
+    const formulaReplacements = formulaHtmlValues.map((html, index) =>
+      html + (formulaValues[index].wordSpaceAfter ? WORD_INLINE_SPACER_HTML : "")
     );
 
     return {
       html: replaceFormulaSlots(wordText.buildWordHtml(htmlFragment, document, {
         removeBoldFormatting: currentSettings.removeBoldFormatting,
         matchWordFormatting: currentSettings.matchWordFormatting
-      }), formulaHtmlValues),
+      }), formulaReplacements),
       plainText: fragmentToPlainText(plainFragment)
     };
   }
 
-  async function copySelectionToWord(range) {
+  function captureSelectionSnapshot(range) {
+    const copyRange = expandTextLabelBoundaries(range);
+    return {
+      fragment: copyRange.cloneContents(),
+      plainText: copyRange.toString(),
+      formulas: formulaRootsInRange(copyRange).map((formula) => ({ ...classifyFormula(formula) }))
+    };
+  }
+
+  async function copySelectionToWord(snapshot) {
     if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
       throw new Error("Rich clipboard writing is unavailable");
     }
 
-    const copyRange = expandTextLabelBoundaries(range);
-    const formulas = formulaRootsInRange(copyRange);
-    const payload = formulas.length > 0
-      ? await buildMixedSelectionPayload(copyRange, formulas)
-      : wordText.buildSelectionPayload(copyRange, document, {
+    const payload = snapshot.formulas.length > 0
+      ? await buildMixedSelectionPayload(snapshot)
+      : { html: wordText.buildWordHtml(snapshot.fragment.cloneNode(true), document, {
         removeBoldFormatting: currentSettings.removeBoldFormatting,
         matchWordFormatting: currentSettings.matchWordFormatting
-      });
+      }), plainText: snapshot.plainText };
     await writeWordClipboard(payload.html, payload.plainText);
   }
 
@@ -723,11 +755,24 @@
       return false;
     }
 
+    const writingBlockSelector = '[data-testid="writing-block-container"], [data-testid="chatgpt-writing-block"]';
+    const startWritingBlock = start.closest(writingBlockSelector);
+    const endWritingBlock = end.closest(writingBlockSelector);
+    if ((startWritingBlock || endWritingBlock) && startWritingBlock !== endWritingBlock) {
+      return false;
+    }
+    const startEditable = start.closest("[contenteditable]:not([contenteditable='false'])");
+    const endEditable = end.closest("[contenteditable]:not([contenteditable='false'])");
+    const insideOneWritingBlock = Boolean(
+      startWritingBlock &&
+      startWritingBlock === endWritingBlock &&
+      startEditable &&
+      endEditable
+    );
     const blockedSelector = [
       "input",
       "textarea",
       "select",
-      "[contenteditable]:not([contenteditable='false'])",
       `[id='${ROOT_ID}']`,
       `[id='${QUICK_ACTIONS_ID}']`,
       `[id='${SELECTION_ACTIONS_ID}']`,
@@ -736,13 +781,16 @@
     if (start.closest(blockedSelector) || end.closest(blockedSelector)) {
       return false;
     }
+    if ((startEditable || endEditable) && !insideOneWritingBlock) {
+      return false;
+    }
 
     const formulas = formulaRootsInRange(range);
     if (!rangeContainsNonFormulaText(range)) {
       return false;
     }
 
-    const containsEquation = formulas.some((formula) => !classifyFormula(formula).label);
+    const containsEquation = formulas.some((formula) => !classifyFormula(formula).wordText);
     return containsEquation
       ? currentSettings.formulaRecognition && currentSettings.textRecognition
       : currentSettings.textRecognition;
@@ -757,6 +805,7 @@
     }
 
     selectionRange = null;
+    selectionSnapshot = null;
     selectionActions?.classList.remove("is-visible");
   }
 
@@ -894,25 +943,46 @@
       "wlc-selection-button"
     );
     actions.appendChild(copyWord);
+    const copyCurrentSelection = async () => {
+      if (!selectionSnapshot || selectionCopyInFlight) {
+        return;
+      }
+
+      const snapshot = selectionSnapshot;
+      selectionCopyInFlight = true;
+      try {
+        await copySelectionToWord(snapshot);
+        showPageToast(translate("copiedWord", "Copied to Word"), false);
+        hideSelectionActions();
+      } catch (error) {
+        showPageToast(translate("copyWordFailed", "Word conversion or copy failed"), true);
+      } finally {
+        selectionCopyInFlight = false;
+      }
+    };
     actions.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       event.stopPropagation();
+      if (event.button === 0 && copyWord.contains(event.target)) {
+        suppressNextSelectionClick = true;
+        window.setTimeout(() => {
+          suppressNextSelectionClick = false;
+        }, 600);
+        void copyCurrentSelection();
+      }
     });
-    actions.addEventListener("click", async (event) => {
-      if (!copyWord.contains(event.target) || !selectionRange) {
+    actions.addEventListener("click", (event) => {
+      if (!copyWord.contains(event.target)) {
         return;
       }
 
       event.preventDefault();
       event.stopPropagation();
-      const range = selectionRange.cloneRange();
-      try {
-        await copySelectionToWord(range);
-        showPageToast(translate("copiedWord", "Copied to Word"), false);
-        hideSelectionActions();
-      } catch (error) {
-        showPageToast(translate("copyWordFailed", "Word conversion or copy failed"), true);
+      if (suppressNextSelectionClick) {
+        suppressNextSelectionClick = false;
+        return;
       }
+      void copyCurrentSelection();
     });
 
     document.documentElement.appendChild(actions);
@@ -935,6 +1005,7 @@
     }
 
     selectionRange = range.cloneRange();
+    selectionSnapshot = captureSelectionSnapshot(range);
     hideQuickActions();
     const actions = ensureSelectionActions();
     positionSelectionActions();

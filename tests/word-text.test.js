@@ -7,6 +7,7 @@ const {
   parseScientificLabelLatex,
   parseSimpleIonLatex,
   parseStandaloneTextScripts,
+  parseWordTextLatex,
   splitUnicodeScripts
 } = require("../src/word-text.js");
 
@@ -60,6 +61,32 @@ test("formats standalone script fragments as Word text", () => {
   });
   assert.equal(parseStandaloneTextScripts("x_2"), null);
   assert.equal(parseStandaloneTextScripts(String.raw`^\frac{1}{2}`), null);
+});
+
+test("formats narrowly scoped scalar notation as Word text", () => {
+  assert.deepEqual(parseWordTextLatex(String.raw`\varepsilon=10^{-4}`), {
+    html: "<span>ε = 10<sup>−4</sup></span>",
+    plainText: "ε = 10⁻⁴"
+  });
+  assert.deepEqual(parseWordTextLatex(String.raw`\epsilon = 2.5^{+3}`), {
+    html: "<span>ε = 2.5<sup>+3</sup></span>",
+    plainText: "ε = 2.5⁺³"
+  });
+  assert.deepEqual(parseWordTextLatex(String.raw`\pm0.25`), {
+    html: "<span>±0.25</span>",
+    plainText: "±0.25"
+  });
+  assert.deepEqual(parseWordTextLatex(String.raw`\leq5.25`), {
+    html: "<span>≤5.25</span>",
+    plainText: "≤5.25"
+  });
+  assert.deepEqual(parseWordTextLatex(String.raw`\geq 0.75`), {
+    html: "<span>≥0.75</span>",
+    plainText: "≥0.75"
+  });
+  assert.equal(parseWordTextLatex(String.raw`N_s`), null);
+  assert.equal(parseWordTextLatex(String.raw`x=10^{-4}`), null);
+  assert.equal(parseWordTextLatex(String.raw`x\leq5.25`), null);
 });
 
 test("does not classify mathematical expressions as scientific labels", () => {

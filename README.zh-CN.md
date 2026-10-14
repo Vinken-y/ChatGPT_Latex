@@ -9,8 +9,12 @@ ChatGPT_Latex 是一个轻量级 Chrome Manifest V3 扩展，用于将 AI 聊天
 - 识别 KaTeX、MathJax、原生 MathML、`data-math` 和新版 ChatGPT 的 `data-math-source` 公式。
 - 全页面只复用一个悬浮工具栏，默认显示主要操作“复制到 Word”；“复制 LaTeX”可在插件设置中开启。
 - 用户选中正文、公式或混合内容后显示“复制到 Word”，不会在后台扫描普通正文。
+- 支持 ChatGPT 写作框内部选区，同时不会在聊天输入框或普通可编辑控件内显示插件复制操作。
 - 将 `A⁺`、`B₂`、`C₃⁻`、`x⁻¹`、`y⁻²` 等通用 Unicode 科学符号转换为 Word 的真正上标/下标，同时保留正文富文本结构。
 - 简单分子式和带电科学标签按 Word 文字处理，不显示公式识别框或公式编辑器：元素数量为下标，电荷为上标；方程和数学表达式仍按 MathML 公式处理。
+- 受限形式的 epsilon 数值赋值、正负数值容差和数值比较阈值按 Word 文字处理，变量及一般方程仍保留为 MathML。
+- 行内公式后原本存在的普通空格会通过 Word spacer run 保留；公式后接标点或位于段尾时不会增加空格。
+- 清理公式周围的 HTML 物理换行，并将逗号等标点输出为 Word 更兼容的普通 MathML 运算符。
 - 公式单独选区和混合选区流程分开：公式单独选区使用公式工具栏，混合选区使用“复制到 Word”。
 - 清理物理回车、缩进、注释、零宽字符和最外层数学分隔符，同时保留矩阵中的 LaTeX 换行命令 `\\`。
 - 将完整公式以 MathML 富剪贴板格式复制，并同时提供规范化的 Word 线性 LaTeX 纯文本回退。
@@ -33,11 +37,11 @@ ChatGPT_Latex 是一个轻量级 Chrome Manifest V3 扩展，用于将 AI 聊天
 
 ### GitHub 正式版
 
-1. 从 [v1.1.2 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.2) 下载 `ChatGPT_Latex-v1.1.2.zip`。
+1. 从 [v1.2.0 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.2.0) 下载 `ChatGPT_Latex-v1.2.0.zip`。
 2. 解压该文件。
 3. 打开 `chrome://extensions` 或 `edge://extensions`。
 4. 开启“开发者模式”。
-5. 点击“加载已解压的扩展程序”，选择解压后的 `ChatGPT_Latex-v1.1.2` 目录。
+5. 点击“加载已解压的扩展程序”，选择解压后的 `ChatGPT_Latex-v1.2.0` 目录。更新后重新加载插件，并刷新已打开的聊天页面。
 
 ### 源码安装
 
