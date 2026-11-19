@@ -1,21 +1,30 @@
-(function initializeChatGptFonts() {
+(function initializeSiteAppearance() {
   "use strict";
 
   const fonts = globalThis.SciFontSettings;
-  const keys = [...fonts.keys, "chatgptBoldColorEnabled", "chatgptBoldColor"];
+  const site = fonts.siteForHost(location.hostname);
+  if (!site) return;
+  const keys = fonts.keysForSite(site);
   const settings = {};
+
+  chrome.runtime.onMessage.addListener((message, sender, respond) => {
+    if (message?.type === fonts.siteMessage && sender.id === chrome.runtime.id) {
+      respond(site);
+    }
+  });
 
   function applyAppearance() {
     const root = document.documentElement;
-    const fontStack = fonts.fontStack(settings);
+    const appearance = fonts.appearanceForSite(site, settings);
+    const fontStack = fonts.fontStack(appearance);
     if (fontStack) {
       root.style.setProperty("--wlc-page-font", fontStack);
     } else {
       root.style.removeProperty("--wlc-page-font");
     }
     root.toggleAttribute("data-wlc-page-font", Boolean(fontStack));
-    const boldColor = settings.chatgptBoldColor ?? "#a54b31";
-    const useBoldColor = settings.chatgptBoldColorEnabled === true &&
+    const boldColor = appearance.chatgptBoldColor ?? "#a54b31";
+    const useBoldColor = appearance.chatgptBoldColorEnabled === true &&
       typeof boldColor === "string" && /^#[0-9a-f]{6}$/i.test(boldColor);
     if (useBoldColor) {
       root.style.setProperty("--wlc-bold-text-color", boldColor);
@@ -26,6 +35,7 @@
   }
 
   function initialize() {
+    document.documentElement.dataset.wlcAppearanceSite = site;
     const pendingKeys = new Set(keys);
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area !== "local") {

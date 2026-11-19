@@ -4,6 +4,15 @@ All notable changes to ChatGPT for SCI are documented here. Dates use ISO 8601.
 
 本文件记录 ChatGPT for SCI 的重要变更，日期使用 ISO 8601 格式。
 
+## [1.6.0] - 2026-11-19
+
+- Added independent font and bold color settings for ChatGPT and Gemini, with automatic detection of the current site. Existing ChatGPT preferences carry over.
+- ChatGPT 和 Gemini 分别保存中英文字体与加粗颜色。弹窗自动识别当前网站，保留已有 ChatGPT 设置。
+- Choosing a bold text color enables it for the selected site. Gemini's rich-text draft also follows the color setting.
+- 选定加粗颜色时立即为所选网站开启着色，Gemini 输入框中已加粗的文字也会跟随设置。
+- Treat inline Gemini chemical contact notation as Word text with subscripts, not as an equation.
+- Gemini 行内化学接触记号按 Word 正文复制并保留下标，不再显示公式控件。
+
 ## [1.5.2] - 2026-11-19
 
 ### Changed / 变更
@@ -253,6 +262,7 @@ All notable changes to ChatGPT for SCI are documented here. Dates use ISO 8601.
 - Added automated source checks, manifest/localization validation, unit tests, and extension fixtures.
 - 新增源码语法检查、Manifest/本地化校验、单元测试和扩展测试页面。
 
+[1.6.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.6.0
 [1.5.2]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.5.2
 [1.2.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.2.0
 [1.1.2]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.2

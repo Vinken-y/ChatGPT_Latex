@@ -35,6 +35,31 @@ test("converts Gemini text notation while preserving genuine equations", () => {
   }
 });
 
+test("keeps Gemini chemical contacts in text and leaves multiplication as math", () => {
+  const contact = "<span>\u2212OH \u22ef NH<sub>3</sub></span>";
+  for (const latex of [
+    String.raw`-\mathrm{OH}\cdots\mathrm{NH}_3`,
+    String.raw`\text{-OH}\,\cdot\cdot\cdot\,\text{NH}_3`,
+    "-OH \u22ef NH\u2083"
+  ]) {
+    assert.equal(parseGeminiTextLatex(latex)?.html, contact, latex);
+  }
+  assert.equal(parseGeminiTextLatex(String.raw`\mathrm{CaCl}_2\cdot\mathrm{NH}_3`)?.html,
+    "<span>CaCl<sub>2</sub> \u00b7 NH<sub>3</sub></span>");
+  assert.equal(parseGeminiTextLatex(String.raw`-\mathrm{OH}\cdots ABC`)?.html,
+    "<span>\u2212OH \u22ef ABC</span>");
+  for (const latex of [
+    String.raw`a\cdot b`,
+    String.raw`F_1\cdot F_2`,
+    String.raw`A_1\cdots A_n`,
+    String.raw`\mathrm{A}\cdot\mathrm{B}_2`,
+    String.raw`-\mathrm{ABC}\cdots ABC`,
+    String.raw`x=-\mathrm{OH}\cdots\mathrm{NH}_3`
+  ]) {
+    assert.equal(parseGeminiTextLatex(latex), null, latex);
+  }
+});
+
 test("formats molecular formulas and charged labels as Word text", () => {
   assert.deepEqual(parseScientificLabelLatex(String.raw`\mathrm{C_2}`), {
     html: "<span>C<sub>2</sub></span>",

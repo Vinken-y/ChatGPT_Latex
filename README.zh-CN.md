@@ -1,6 +1,6 @@
 # ChatGPT for SCI
 
-ChatGPT for SCI 可自定义 ChatGPT 字体，并将受支持的 AI 聊天页面中的科学内容复制到 Microsoft Word。鼠标悬停公式后可复制完整 Word 公式；选中正文、公式或两者混合内容后，可一次性复制为适配 Word 的富文本。
+ChatGPT for SCI 可分别自定义 ChatGPT 和 Gemini 字体，并将受支持的 AI 聊天页面中的科学内容复制到 Microsoft Word。鼠标悬停公式后可复制完整 Word 公式；选中正文、公式或两者混合内容后，可一次性复制为适配 Word 的富文本。
 
 [English](README.md) | [隐私说明](PRIVACY.md) | [安全政策](SECURITY.md) | [性能审查](docs/PERFORMANCE.md) | [更新日志](CHANGELOG.md)
 
@@ -37,19 +37,19 @@ ChatGPT for SCI 可自定义 ChatGPT 字体，并将受支持的 AI 聊天页面
 
 ### GitHub 正式版
 
-1. 从 [v1.5.2 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.5.2) 下载 `ChatGPT_for_SCI-v1.5.2.zip`。
+1. 从 [v1.6.0 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.6.0) 下载 `ChatGPT_for_SCI-v1.6.0.zip`。
 2. 解压该文件。
 3. 打开 `chrome://extensions` 或 `edge://extensions`。
 4. 开启“开发者模式”。
 5. 点击“加载已解压的扩展程序”，选择解压后的插件目录。更新后重新加载插件，并刷新已打开的聊天页面。
 
-### ChatGPT 字体
+### ChatGPT 和 Gemini 字体
 
-在「字体」页分别选择中文和英文字体，同一设置应用到 ChatGPT 的侧栏、对话、输入框和写作面板。
+「字体」页自动识别当前的 ChatGPT 或 Gemini 网页，也可通过「网站」下拉菜单手动切换。两站的中英文字体和加粗颜色分别保存在本机，设置适用于对应网站的侧栏、对话和输入框。复制设置仍由两站共用。
 两项均设为「网页默认」即可恢复原样。设置即时生效并保存在本机。
 识别与剪贴板设置位于「复制」页。
 
-打开「加粗文字颜色」并选择色块，可为聊天和写作面板中明确加粗的文字上色。
+选择「加粗文字颜色」即为所选网站开启着色。
 关闭开关即可恢复网页颜色。
 
 Arial 和 Times New Roman 优先使用系统字体，缺失时使用插件内置的 Arimo 和 Tinos

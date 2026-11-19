@@ -1,14 +1,20 @@
 /* Apply the same language-aware font stack to text inserted anywhere on the page. */
+:root[data-wlc-appearance-site="gemini"] {
+  --wlc-site-text-font: "Google Sans Flex", "Google Sans", "Helvetica Neue";
+}
+
 :root[data-wlc-page-font] body,
 :root[data-wlc-page-font] body :not(:where(
-  :is(svg, math, .katex, .katex-display, mjx-container, [role="math"], [data-math-source],
+  :is(svg, math, .katex, .katex-display, mjx-container, [role="math"], [data-math-source], [data-math],
+      gem-icon, mat-icon, .lumi-symbols, .google-symbols, .mat-ligature-font,
       .material-icons, .material-symbols-outlined, #chatgpt-latex-root,
       #chatgpt-latex-quick-actions, #chatgpt-latex-selection-actions, .wlc-page-toast),
-  :is(svg, math, .katex, .katex-display, mjx-container, [role="math"], [data-math-source],
+  :is(svg, math, .katex, .katex-display, mjx-container, [role="math"], [data-math-source], [data-math],
+      gem-icon, mat-icon, .lumi-symbols, .google-symbols, .mat-ligature-font,
       .material-icons, .material-symbols-outlined, #chatgpt-latex-root,
       #chatgpt-latex-quick-actions, #chatgpt-latex-selection-actions, .wlc-page-toast) *
 )) {
-  font-family: var(--wlc-page-font), var(--wlc-native-text-font, var(--font-sans, system-ui)), sans-serif !important;
+  font-family: var(--wlc-page-font), var(--wlc-native-text-font, var(--wlc-site-text-font, var(--font-sans, system-ui))), sans-serif !important;
 }
 
 :root[data-wlc-page-font] :is(pre, code, kbd, samp, .font-mono) {
@@ -16,16 +22,19 @@
 }
 
 :root[data-wlc-page-font] :is(input, textarea)::placeholder,
-:root[data-wlc-page-font] :is(#prompt-textarea, [data-composer-markdown]) [data-placeholder]::before {
+:root[data-wlc-page-font] :is(#prompt-textarea, [data-composer-markdown]) [data-placeholder]::before,
+:root[data-wlc-page-font] rich-textarea .ql-editor[data-placeholder]::before {
   font-family: inherit !important;
 }
 
 :root[data-wlc-bold-color] :is(
   [data-response-body], [data-markdown-text-style="assistant-message"],
   [data-message-author-role] .markdown, [data-user-message-bubble], .rich-text-user-turn,
+  model-response message-content, user-query .query-text,
+  rich-textarea .ql-editor[contenteditable="true"],
   :is([data-testid="chatgpt-writing-block"], [data-testid="writing-block-container"]) .writing-block-editor
 ) :is(strong, b):not(:where(
-  :is(pre, code, kbd, samp, .font-mono, .katex, mjx-container, math, svg, button, [role="button"]) *
+  :is(pre, code, kbd, samp, .font-mono, .katex, mjx-container, math, [data-math], svg, gem-icon, mat-icon, button, [role="button"]) *
 )) {
   color: var(--wlc-bold-text-color) !important;
 }

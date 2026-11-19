@@ -9,7 +9,7 @@
   <model-response>
     <message-content>
       <p id="mixed">
-        <span>Sample <span class="math-inline" data-math="\text{Me}_2\text{O}"><span class="katex">Me2O</span></span> and </span><span class="math-inline" data-math="\frac{p_1}{q^2}"><span class="katex">p/q</span></span><span> are paired with X<sub>3</sub> and y&#x207B;&#x00B9;.</span>
+        <span>Sample <span class="math-inline" data-math="\text{Me}_2\text{O}"><span class="katex">Me2O</span></span> and </span><span class="math-inline" data-math="\frac{p_1}{q^2}"><span class="katex">p/q</span></span><span> are paired with <span class="math-inline" data-math="-\mathrm{OH}\cdots\mathrm{NH}_3"><span class="katex">contact</span></span>, X<sub>3</sub> and y&#x207B;&#x00B9;.</span>
         <span class="math-inline" data-math="\unknown{z}"><span class="katex-error">unrendered source</span></span>
         <span class="math-inline" data-math="\outdated"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>f</mi></mrow><annotation encoding="application/x-tex">f(x)=x^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true">f(x)=x^2</span></span></span>
       </p>
@@ -57,9 +57,9 @@
     }
     async function run() {
       const paragraph = document.getElementById("mixed");
-      const [label, fraction, failed, annotation] = paragraph.querySelectorAll("[data-math]");
+      const [label, fraction, contact, failed, annotation] = paragraph.querySelectorAll("[data-math]");
       const display = document.querySelector(".math-block");
-      await waitFor(() => label.hasAttribute("data-wlc-text-label") &&
+      await waitFor(() => label.hasAttribute("data-wlc-text-label") && contact.hasAttribute("data-wlc-text-label") &&
         fraction.getAttribute("data-wlc-recognized") === "inline" &&
         display.getAttribute("data-wlc-recognized") === "display");
       const range = document.createRange();
@@ -71,6 +71,7 @@
       document.querySelector(selector).click();
       await waitFor(() => writes.length === 1);
       if (!clipboard.includes("Me<sub>2</sub>O") || !clipboard.includes("X<sub>3</sub>") ||
+          !clipboard.includes("OH \u22ef NH<sub>3</sub>") || contact.hasAttribute("data-wlc-recognized") ||
           !clipboard.includes("y<sup>−1</sup>") || !clipboard.includes("<mfrac>") ||
           !clipboard.includes("<msup>") || !clipboard.includes("unrendered source") ||
           (clipboard.match(/<math\b/g) || []).length !== 2 ||

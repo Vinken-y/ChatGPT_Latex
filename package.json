@@ -1,6 +1,6 @@
 {
   "name": "chatgpt-latex",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "description": "Copy Word-ready equations and scientific text from AI chat pages.",
   "private": true,
   "license": "MIT",

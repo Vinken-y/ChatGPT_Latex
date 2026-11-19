@@ -202,7 +202,7 @@
     return runs.length > 0 ? runs : null;
   }
 
-  function buildScientificLabel(runs, charge) {
+  function buildScientificLabel(runs, charge, wrap = true) {
     const bodyHtml = runs.map((run) =>
       run.text + (run.subscript ? `<sub>${run.subscript}</sub>` : "")
     ).join("");
@@ -210,7 +210,7 @@
     const chargeHtml = charge ? `<sup>${charge}</sup>` : "";
 
     return {
-      html: `<span>${bodyHtml}${chargeHtml}</span>`,
+      html: wrap ? `<span>${bodyHtml}${chargeHtml}</span>` : bodyHtml + chargeHtml,
       plainText: `${bodyText}${charge}`
     };
   }
@@ -359,6 +359,51 @@
     return parseScientificLabelLatex(input) || parseSimpleScalarLatex(input);
   }
 
+  function parseChemicalContactLatex(source) {
+    if (!/\\(?:cdots|dotsc|dots|ldots|cdot)\b|[\u22ef\u00b7\u2026]|\.\.\./.test(source)) {
+      return null;
+    }
+    const wrapped = /\\(?:text|mathrm)\s*\{/.test(source);
+    const marked = unicodeScriptsToLatex(source)
+      .replace(/\\(?:cdots|dotsc|dots|ldots)\b|[\u2026]|\.\.\./g, "\u22ef")
+      .replace(/\\cdot\b/g, "\u00b7")
+      .replace(/\\[!,;: ]|\\(?:quad|qquad)\b/g, "");
+    const value = unwrapIonFormatting(marked)
+      .replace(/\s/g, "")
+      .replace(/\u00b7{3}/g, "\u22ef");
+    const parts = value.split(/([\u22ef\u00b7])/);
+    if (parts.length !== 3) return null;
+    const [left, separator, right] = parts;
+    const bond = /^[-\u2212\u2013]/.test(left);
+    // A single multiplication dot is ambiguous without upright notation or a bond prefix.
+    if (separator === "\u00b7" && !wrapped && !bond) return null;
+
+    function parseSpecies(value) {
+      const terminal = splitTerminalCharge(value);
+      const runs = terminal && parseLabelRuns(
+        terminal.body,
+        /^([A-Z][a-z]?)/,
+        (token) => CHEMICAL_ELEMENTS.has(token) || CHEMICAL_GROUPS.has(token)
+      );
+      if (!runs || (runs.length === 1 && !runs[0].subscript && !terminal.charge &&
+          !CHEMICAL_GROUPS.has(runs[0].text))) {
+        return null;
+      }
+      return buildScientificLabel(runs, terminal.charge, false);
+    }
+
+    const first = parseSpecies(bond ? left.slice(1) : left);
+    const second = parseSpecies(right) || (bond && first && /^[A-Z]{2,6}$/.test(right)
+      ? { html: right, plainText: right }
+      : null);
+    if (!first || !second) return null;
+    const prefix = bond ? "\u2212" : "";
+    return {
+      html: "<span>" + prefix + first.html + " " + separator + " " + second.html + "</span>",
+      plainText: prefix + first.plainText + " " + separator + " " + second.plainText
+    };
+  }
+
   function parseGeminiTextLatex(source) {
     if (source.length > 180) {
       return null;
@@ -367,6 +412,8 @@
     if (citation) {
       return { html: "<span><sup>" + citation[1] + "</sup></span>", plainText: citation[1] };
     }
+    const contact = parseChemicalContactLatex(source);
+    if (contact) return contact;
     if (!/\\(?:text|mathrm)\s*\{/.test(source)) {
       return null;
     }

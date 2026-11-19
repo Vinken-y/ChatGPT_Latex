@@ -16,6 +16,8 @@
   const fonts = globalThis.SciFontSettings;
   const settingInputs = Array.from(document.querySelectorAll("[data-setting]"));
   const controls = Object.fromEntries(settingInputs.map((input) => [input.dataset.setting, input]));
+  const sitePicker = document.getElementById("appearance-site");
+  const copyKeys = Object.keys(DEFAULTS).filter((key) => !fonts.appearanceKeys.includes(key));
   const preview = document.getElementById("font-preview");
   const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
   const colorPanel = document.getElementById("color-panel");
@@ -26,6 +28,7 @@
   const swatches = Array.from(colorPanel.querySelectorAll("[data-color]"));
   const status = document.getElementById("status");
   let statusTimer = null;
+  let loadRevision = 0;
 
   function translate(key, fallback) {
     return chrome.i18n?.getMessage(key) || fallback;
@@ -77,13 +80,18 @@
 
   function save(event) {
     const input = event.currentTarget;
+    if (input.disabled) return;
+    const site = sitePicker.value;
+    const setting = input.dataset.setting;
+    const changes = {
+      [fonts.storageKey(site, setting)]: input.type === "checkbox" ? input.checked : input.value
+    };
+    if (setting === "chatgptBoldColor") {
+      controls.chatgptBoldColorEnabled.checked = true;
+      changes[fonts.storageKey(site, "chatgptBoldColorEnabled")] = true;
+    }
     updatePreview();
-    chrome.storage.local.set(
-      {
-        [input.dataset.setting]: input.type === "checkbox" ? input.checked : input.value
-      },
-      reportSave
-    );
+    chrome.storage.local.set(changes, reportSave);
   }
 
   function selectTab(target) {
@@ -132,9 +140,37 @@
   }
 
   function loadSettings() {
-    chrome.storage.local.get([...Object.keys(DEFAULTS), ...fonts.keys], (stored) => {
-      showSettings({ ...DEFAULTS, ...stored, ...fonts.resolve(stored) });
+    const revision = ++loadRevision;
+    const site = sitePicker.value;
+    settingInputs.forEach((input) => { input.disabled = true; });
+    colorTrigger.disabled = true;
+    const siteKeys = site ? fonts.keysForSite(site) : [];
+    chrome.storage.local.get([...copyKeys, ...siteKeys], (stored) => {
+      if (revision !== loadRevision) return;
+      const failed = Boolean(chrome.runtime.lastError);
+      const appearance = site ? fonts.appearanceForSite(site, stored) : {};
+      showSettings({ ...DEFAULTS, ...stored, ...appearance });
+      settingInputs.forEach((input) => {
+        input.disabled = failed || (!site && fonts.appearanceKeys.includes(input.dataset.setting));
+      });
+      colorTrigger.disabled = failed || !site;
     });
+  }
+
+  async function initializeSettings() {
+    settingInputs.forEach((input) => { input.disabled = true; });
+    colorTrigger.disabled = true;
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab?.id != null) {
+        const site = await chrome.tabs.sendMessage(tab.id, { type: fonts.siteMessage });
+        if (site === "gemini" || site === "chatgpt") sitePicker.value = site;
+      }
+    } catch {
+      // Outside a supported tab, the website can still be selected manually.
+    }
+    sitePicker.disabled = false;
+    loadSettings();
   }
 
   tabs.forEach((tab, index) => {
@@ -154,7 +190,13 @@
     });
   });
 
-  loadSettings();
+  sitePicker.addEventListener("change", () => {
+    if (colorPanel.matches(":popover-open")) colorPanel.hidePopover();
+    window.clearTimeout(statusTimer);
+    status.textContent = "";
+    loadSettings();
+  });
+  initializeSettings();
   settingInputs.forEach((input) => input.addEventListener("change", save));
   controls.chatgptBoldColor.addEventListener("input", updatePreview);
   for (const swatch of swatches) {

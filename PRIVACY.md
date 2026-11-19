@@ -11,7 +11,7 @@ ChatGPT for SCI processes formulas and user-selected text locally inside the bro
 - **Data read:** formula-related DOM content on the explicitly supported AI chat sites listed in `manifest.json`; the selected DOM range only after the user selects ordinary text.
 - **Purpose:** detect formulas, show local controls, normalize LaTeX, convert selected Unicode scientific scripts to Word rich text, and create clipboard content requested by the user.
 - **Data transfer:** no selected text, chat text, or formula is sent to the developer, an analytics service, or any external server. Formula conversion messages remain inside the extension between the content script and its service worker; selected text conversion stays in the content script.
-- **Storage:** recognition, copy, and ChatGPT font preferences are saved in local extension storage. The extension does not sync those preferences and does not store formulas or chat content.
+- **Storage:** recognition, copy, and site-specific ChatGPT and Gemini appearance preferences are saved in local extension storage. The extension does not sync those preferences and does not store formulas or chat content.
 - **Fonts:** the typography feature uses system fonts and font files bundled in the extension.
 - **Clipboard:** the extension writes to the clipboard only after the user activates a copy control. It does not read clipboard contents.
 - **Telemetry and advertising:** none.

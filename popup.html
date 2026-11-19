@@ -28,6 +28,14 @@
 
       <section id="fonts-panel" class="panel font-card" role="tabpanel" aria-labelledby="fonts-tab">
         <label class="setting">
+          <strong data-i18n="appearanceSite">Website</strong>
+          <select id="appearance-site" disabled>
+            <option value="" disabled selected data-i18n="chooseAppearanceSite">Choose a website</option>
+            <option value="chatgpt">ChatGPT</option>
+            <option value="gemini">Gemini</option>
+          </select>
+        </label>
+        <label class="setting">
           <strong data-i18n="chineseFont">Chinese font</strong>
           <select data-setting="chatgptChineseFont">
             <option value="default" data-i18n="defaultFont">Page default</option>

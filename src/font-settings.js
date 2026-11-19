@@ -3,7 +3,8 @@
 
   const CHINESE_RANGE = "U+2E80-2FFF, U+3000-303F, U+3100-312F, U+31A0-33FF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF, U+20000-323AF";
   const legacyKeys = ["chatgptReplyFont", "chatgptPromptFont", "chatgptInterfaceFont"];
-  const keys = ["chatgptEnglishFont", "chatgptChineseFont", ...legacyKeys];
+  const appearanceKeys = ["chatgptEnglishFont", "chatgptChineseFont", "chatgptBoldColorEnabled", "chatgptBoldColor"];
+  const siteMessage = "sci-appearance-site";
   const english = {
     default: [],
     "times-new-roman": ["Times New Roman", "SCI Tinos"],
@@ -57,6 +58,28 @@
     };
   }
 
+  function siteForHost(host) {
+    if (host === "gemini.google.com") return "gemini";
+    if (host === "chatgpt.com" || host === "chat.openai.com") return "chatgpt";
+    return null;
+  }
+
+  function storageKey(site, key) {
+    return site === "gemini" && appearanceKeys.includes(key)
+      ? key.replace(/^chatgpt/, "gemini")
+      : key;
+  }
+
+  function keysForSite(site) {
+    const keys = appearanceKeys.map((key) => storageKey(site, key));
+    return site === "chatgpt" ? [...keys, ...legacyKeys] : keys;
+  }
+
+  function appearanceForSite(site, stored = {}) {
+    const settings = Object.fromEntries(appearanceKeys.map((key) => [key, stored[storageKey(site, key)]]));
+    return { ...settings, ...resolve(site === "chatgpt" ? stored : settings) };
+  }
+
   function addFont(name, faces) {
     if (registered.has(name)) {
       return;
@@ -88,5 +111,5 @@
     return families.map((name) => JSON.stringify(name)).join(", ");
   }
 
-  root.SciFontSettings = { keys, resolve, fontStack };
+  root.SciFontSettings = { appearanceKeys, siteMessage, siteForHost, keysForSite, storageKey, appearanceForSite, fontStack };
 })(globalThis);

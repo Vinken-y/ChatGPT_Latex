@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extensionName__",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "description": "__MSG_extensionDescription__",
   "default_locale": "en",
   "permissions": ["clipboardWrite", "storage"],
@@ -26,7 +26,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*", "https://gemini.google.com/*"],
       "js": ["src/font-settings.js", "src/chatgpt-fonts.js"],
       "css": ["src/chatgpt-fonts.css"],
       "run_at": "document_start"
@@ -64,7 +64,7 @@
         "fonts/tinos-latin-700-normal.woff2",
         "fonts/tinos-latin-700-italic.woff2"
       ],
-      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"]
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*", "https://gemini.google.com/*"]
     }
   ]
 }

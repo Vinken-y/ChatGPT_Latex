@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Gemini typography regression</title>
+  <style>
+    body { color: rgb(34, 34, 34); font-family: Arial, sans-serif; }
+    .katex { font-family: KaTeX_Main, serif; }
+    .lumi-symbols { font-family: "Luminous Symbols", sans-serif; }
+    .ql-editor[data-placeholder]::before {
+      content: attr(data-placeholder);
+      font-family: Arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <nav id="nav">Navigation</nav>
+  <user-query><div class="query-text" id="query">User <b id="user-bold">emphasis</b></div></user-query>
+  <model-response>
+    <message-content>
+      <p id="response">Reply <b id="reply-bold">emphasis</b>.</p>
+      <p><span class="math-inline" data-math="\frac{x}{y}"><span id="math" class="katex">x/y</span></span></p>
+      <p><code><b id="code-bold">sample</b></code></p>
+    </message-content>
+  </model-response>
+  <rich-textarea><div id="editor" class="ql-editor" contenteditable="true" role="textbox" data-placeholder="Enter a prompt"></div></rich-textarea>
+  <template id="draft"><p>Draft <strong id="draft-bold">emphasis</strong>.</p></template>
+  <gem-icon><mat-icon id="icon" class="lumi-symbols">search</mat-icon></gem-icon>
+</body>
+</html>
