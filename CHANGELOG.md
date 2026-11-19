@@ -4,6 +4,11 @@ All notable changes to ChatFacet (formerly ChatGPT for SCI) are documented here.
 
 本文件记录 ChatFacet（原 ChatGPT for SCI）的重要变更，日期使用 ISO 8601 格式。
 
+## Repository maintenance / 仓库维护
+
+- Renamed the GitHub repository to ChatFacet and updated project links and templates without changing the extension or existing releases.
+- GitHub 仓库更名为 ChatFacet，并同步项目链接和模板；扩展功能和历史发布保持不变。
+
 ## [1.7.1] - 2026-11-19
 
 - Updated the ChatFacet visual identity with a two-tone conversation mark and a coordinated popup header. Extension permissions and existing settings are unchanged.
@@ -276,12 +281,12 @@ All notable changes to ChatFacet (formerly ChatGPT for SCI) are documented here.
 - Added automated source checks, manifest/localization validation, unit tests, and extension fixtures.
 - 新增源码语法检查、Manifest/本地化校验、单元测试和扩展测试页面。
 
-[1.7.1]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.7.1
-[1.7.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.7.0
-[1.6.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.6.0
-[1.5.2]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.5.2
-[1.2.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.2.0
-[1.1.2]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.2
-[1.1.1]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.1
-[1.1.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.0
-[1.0.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.0.0
+[1.7.1]: https://github.com/Vinken-y/ChatFacet/releases/tag/v1.7.1
+[1.7.0]: https://github.com/Vinken-y/ChatFacet/releases/tag/v1.7.0
+[1.6.0]: https://github.com/Vinken-y/ChatFacet/releases/tag/v1.6.0
+[1.5.2]: https://github.com/Vinken-y/ChatFacet/releases/tag/v1.5.2
+[1.2.0]: https://github.com/Vinken-y/ChatFacet/releases/tag/v1.2.0
+[1.1.2]: https://github.com/Vinken-y/ChatFacet/releases/tag/v1.1.2
+[1.1.1]: https://github.com/Vinken-y/ChatFacet/releases/tag/v1.1.1
+[1.1.0]: https://github.com/Vinken-y/ChatFacet/releases/tag/v1.1.0
+[1.0.0]: https://github.com/Vinken-y/ChatFacet/releases/tag/v1.0.0

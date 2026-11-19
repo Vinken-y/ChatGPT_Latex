@@ -1,4 +1,4 @@
-# Contributing / 贡献指南
+# Contributing to ChatFacet / 贡献指南
 
 ## English
 
@@ -9,7 +9,7 @@
 5. Run `npm ci`, `npm run validate`, `npm run check`, and `npm test`.
 6. Open a pull request using the template and describe browser/Word validation honestly.
 
-UI changes must preserve equal hierarchy for the two copy actions, avoid changing host-page layout, support light/dark pages, and remain keyboard accessible. New supported sites require the narrowest possible match pattern and representative fixtures.
+UI changes must preserve the native selection action, support light and dark pages, and remain keyboard accessible. When changing selection controls, check both ChatGPT and Gemini, including the standalone fallback. New supported sites require the narrowest possible match pattern and representative fixtures.
 
 KaTeX updates are manual because the extension vendors `src/vendor/katex.min.js`. Update the exact dependency and lockfile, copy the official distribution file and license, update `THIRD_PARTY_NOTICES.md`, then run the full security and Word-output regression suite.
 
@@ -22,6 +22,6 @@ KaTeX updates are manual because the extension vendors `src/vendor/katex.min.js`
 5. 运行 `npm ci`、`npm run validate`、`npm run check` 和 `npm test`。
 6. 按模板提交 Pull Request，并如实说明浏览器与 Word 验证范围。
 
-UI 改动必须维持两个复制操作的平行层级，不改变宿主网页布局，支持浅色/深色页面，并可通过键盘操作。新增站点时应使用尽可能窄的匹配规则，并提供代表性测试页面。
+UI 改动必须保留原生选区操作，支持浅色与深色页面，并可通过键盘操作。修改选区工具时，分别检查 ChatGPT、Gemini 及独立按钮回退。新增站点时应使用尽可能窄的匹配规则，并提供代表性测试页面。
 
 KaTeX 更新必须人工完成，因为扩展会内置 `src/vendor/katex.min.js`。更新精确依赖与锁文件后，还需同步官方发行文件和许可证、更新 `THIRD_PARTY_NOTICES.md`，并重新运行完整安全与 Word 输出回归测试。

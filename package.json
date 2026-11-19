@@ -6,12 +6,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Vinken-y/ChatGPT_Latex.git"
+    "url": "git+https://github.com/Vinken-y/ChatFacet.git"
   },
   "bugs": {
-    "url": "https://github.com/Vinken-y/ChatGPT_Latex/issues"
+    "url": "https://github.com/Vinken-y/ChatFacet/issues"
   },
-  "homepage": "https://github.com/Vinken-y/ChatGPT_Latex#readme",
+  "homepage": "https://github.com/Vinken-y/ChatFacet#readme",
   "engines": {
     "node": ">=20"
   },

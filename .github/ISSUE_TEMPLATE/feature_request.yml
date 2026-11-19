@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest a focused compatibility, workflow, or performance improvement.
+description: Suggest an appearance, interaction, compatibility, or performance improvement for ChatFacet.
 title: "[Feature]: "
 labels: [enhancement, needs-triage]
 body:

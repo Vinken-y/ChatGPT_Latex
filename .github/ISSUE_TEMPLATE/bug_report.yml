@@ -1,5 +1,5 @@
 name: Bug report
-description: Report reproducible formula recognition, clipboard, Word, or UI behavior.
+description: Report a reproducible ChatFacet appearance, selection, formula, or copying issue.
 title: "[Bug]: "
 labels: [bug, needs-triage]
 body:
@@ -11,8 +11,8 @@ body:
           required: true
   - type: input
     attributes:
-      label: ChatGPT_Latex version
-      placeholder: v1.5.2
+      label: ChatFacet version
+      description: The version is shown in the extension popup.
     validations:
       required: true
   - type: input
@@ -23,12 +23,12 @@ body:
       required: true
   - type: input
     attributes:
-      label: Site and Word version
-      placeholder: chatgpt.com; Microsoft 365 Word version 0000
+      label: Site and Word version (if relevant)
+      placeholder: chatgpt.com or gemini.google.com; include the Word version for paste issues
   - type: textarea
     attributes:
-      label: Minimal formula and steps
-      description: Use a synthetic formula, not private conversation content.
+      label: Steps and minimal example
+      description: Use public or synthetic text and formulas, not private conversation content.
     validations:
       required: true
   - type: textarea

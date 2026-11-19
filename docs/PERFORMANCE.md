@@ -1,10 +1,16 @@
-# Performance audit / 性能审查
+# ChatFacet performance audit / 性能审查
 
-Audit date: 2026-08-10. Measurements are intended to catch architectural regressions, not to promise identical timings on every page or device.
+Audit date: 2026-08-10. Counts and file sizes below are a historical baseline, not fresh measurements of the current version or a guarantee across devices.
 
-审查日期：2026-08-10。以下数据用于发现架构回退，不代表所有网页和设备都会得到完全相同的时间结果。
+审查日期：2026-08-10。以下计数和文件体积是历史基线，不代表当前版本的实测结果，也不代表所有设备上的表现。
 
-## Findings / 结论
+## Current implementation / 当前实现
+
+ChatFacet reuses one formula hover toolbar and one selection copy control. An eligible completed selection is snapshotted locally while its toolbar is open. Toolbar placement checks nearby overlays on demand; clipboard conversion still waits for the copy action.
+
+ChatFacet 分别复用一个公式悬浮工具条和一个选区复制控件。有效选区完成后，工具条打开期间会在本地内存临时保留选区；浮层定位按需检查附近控件，剪贴板转换仅在点击复制后执行。
+
+## Historical findings / 历史结论
 
 - The previously loaded implementation injected one toolbar and two buttons into every recognized formula. In one existing long ChatGPT page with 109 recognized formulas, this produced **109 toolbar containers and 218 buttons**.
 - 新实现不再向每个公式内部注入控件；整个页面固定为 **1 个工具栏、2 个按钮和常量数量的监听器**。
@@ -15,7 +21,7 @@ Audit date: 2026-08-10. Measurements are intended to catch architectural regress
 - The formula observer watches added nodes plus six formula-source attributes. It does not watch generic class/style changes or character data.
 - 公式观察器只监听新增节点和六个公式源码属性，不监听通用 class/style 变化或字符数据。
 
-## Runtime design / 运行时设计
+## Historical runtime design / 历史运行时设计
 
 | Area | v1.1.1 behavior |
 | --- | --- |
@@ -42,9 +48,9 @@ Raw and gzip sizes from the v1.1.1 source tree:
 | `src/word-text.js` | 14,472 B | 4,387 B |
 | `src/vendor/katex.min.js` | 272,537 B | 75,808 B |
 
-KaTeX is not listed as a content script. Its 272 KB runtime therefore is not parsed or executed in the page context during ordinary browsing. It is loaded by the extension service worker only when **Copy to Word** is requested.
+KaTeX is not listed as a content script. The historical 272 KB runtime does not run in the page context; formula conversion is handled by the extension service worker.
 
-KaTeX 未列入内容脚本，因此日常浏览时不会在网页上下文解析或执行这 272 KB 运行时；只有用户点击“复制到 Word”后，扩展 service worker 才会按需加载和执行。
+KaTeX 未列入内容脚本，历史版本的 272 KB 运行时不会在网页上下文中执行；公式转换由扩展 service worker 处理。
 
 ## Residual cost / 剩余开销
 

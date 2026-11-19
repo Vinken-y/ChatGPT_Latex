@@ -33,13 +33,13 @@ ChatFacet 是一个网页版 AI 聊天的视觉与交互增强工具。可以分
 - Gemini：`gemini.google.com`
 - Microsoft Copilot：`copilot.microsoft.com`
 
-扩展只在这些明确列出的站点读取公式相关 DOM。选中内容仅在用户完成文本选择并点击“复制到 Word”后克隆处理。服务商修改页面结构后，可能需要更新兼容逻辑。
+扩展只在这些明确列出的站点读取公式相关 DOM。选区工具条打开期间，扩展会在内存中临时保留有效选区；只有点击「复制到 Word」才执行富剪贴板转换。服务商修改页面结构后，可能需要更新兼容逻辑。
 
 ## 安装
 
 ### GitHub 正式版
 
-1. 从 [v1.7.1 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.7.1) 下载 `ChatFacet-v1.7.1.zip`。
+1. 从 [最新正式版](https://github.com/Vinken-y/ChatFacet/releases/latest) 下载带版本号的 `ChatFacet-*.zip`。
 2. 解压该文件。
 3. 打开 `chrome://extensions` 或 `edge://extensions`。
 4. 开启“开发者模式”。
@@ -63,7 +63,7 @@ Arial 和 Times New Roman 优先使用系统字体，缺失时使用插件内置
 ### 源码安装
 
 ```powershell
-git clone https://github.com/Vinken-y/ChatGPT_Latex.git
+git clone https://github.com/Vinken-y/ChatFacet.git
 ```
 
 将克隆目录作为已解压扩展加载即可，无需构建。

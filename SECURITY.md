@@ -1,22 +1,22 @@
-# Security Policy / 安全政策
+# ChatFacet Security Policy / 安全政策
 
 ## Supported versions / 支持版本
 
 | Version | Supported |
 | --- | --- |
-| 1.0.x | Yes |
-| Earlier development builds | No |
+| [Latest stable release](https://github.com/Vinken-y/ChatFacet/releases/latest) | Yes |
+| Older releases and development builds | Upgrade before reporting |
 
 | 版本 | 是否支持 |
 | --- | --- |
-| 1.0.x | 是 |
-| 更早的开发构建 | 否 |
+| [最新正式版](https://github.com/Vinken-y/ChatFacet/releases/latest) | 是 |
+| 旧版本和开发构建 | 请先升级再报告 |
 
 ## Reporting a vulnerability / 报告安全问题
 
-Use GitHub's **Report a vulnerability** form in the repository Security tab. Do not disclose a suspected vulnerability in a public issue before a fix is available.
+Use GitHub's private [Report a vulnerability](https://github.com/Vinken-y/ChatFacet/security/advisories/new) form. Do not disclose a suspected vulnerability in a public issue before a fix is available.
 
-请使用仓库 Security 页面中的 **Report a vulnerability** 私下提交。修复发布前，请勿在公开 Issue 中披露疑似漏洞。
+请通过 GitHub 的[安全问题报告表单](https://github.com/Vinken-y/ChatFacet/security/advisories/new)私下提交。修复发布前，请勿在公开 Issue 中披露疑似漏洞。
 
 Include the affected version, browser/Word versions, reproduction steps, expected impact, and a minimal formula when safe. Never attach private conversations, authentication data, browser profiles, or confidential documents.
 

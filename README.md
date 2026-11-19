@@ -2,9 +2,9 @@
 
 ![ChatFacet icon](icons/128.png)
 
-[![CI](https://github.com/Vinken-y/ChatGPT_Latex/actions/workflows/ci.yml/badge.svg)](https://github.com/Vinken-y/ChatGPT_Latex/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/Vinken-y/ChatGPT_Latex)](https://github.com/Vinken-y/ChatGPT_Latex/releases/latest)
-[![License](https://img.shields.io/github/license/Vinken-y/ChatGPT_Latex)](LICENSE)
+[![CI](https://github.com/Vinken-y/ChatFacet/actions/workflows/ci.yml/badge.svg)](https://github.com/Vinken-y/ChatFacet/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Vinken-y/ChatFacet)](https://github.com/Vinken-y/ChatFacet/releases/latest)
+[![License](https://img.shields.io/github/license/Vinken-y/ChatFacet)](LICENSE)
 
 ChatFacet is a visual and interaction enhancer for AI chats on the web. Customize typography and bold text colors in ChatGPT and Gemini, and use a compact selection toolbar to copy formatted text and editable equations to Microsoft Word.
 
@@ -37,13 +37,13 @@ ChatFacet is a visual and interaction enhancer for AI chats on the web. Customiz
 - Gemini: `gemini.google.com`
 - Microsoft Copilot: `copilot.microsoft.com`
 
-The extension reads formula-related DOM on these explicitly matched sites. Selected content is cloned only after the user makes a text selection and activates **Copy to Word**. Page changes by a provider can require a compatibility update.
+The extension reads formula-related DOM on these explicitly matched sites. It takes a temporary snapshot of an eligible selection to preserve it while the copy control is open. Rich clipboard conversion runs only when the user activates **Copy to Word**. Page changes by a provider can require a compatibility update.
 
 ## Install
 
 ### GitHub release
 
-1. Download `ChatFacet-v1.7.1.zip` from the [v1.7.1 release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.7.1).
+1. Download the versioned `ChatFacet-*.zip` package from the [latest release](https://github.com/Vinken-y/ChatFacet/releases/latest).
 2. Extract the archive.
 3. Open `chrome://extensions` or `edge://extensions`.
 4. Enable **Developer mode**.
@@ -71,7 +71,7 @@ change the Word copy workflow.
 ### Source checkout
 
 ```powershell
-git clone https://github.com/Vinken-y/ChatGPT_Latex.git
+git clone https://github.com/Vinken-y/ChatFacet.git
 ```
 
 Load the cloned directory as an unpacked extension. No build step is required.
