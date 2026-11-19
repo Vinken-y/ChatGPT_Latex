@@ -1,7 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
-  <title id="title">ChatGPT_Latex formula mark</title>
-  <rect width="128" height="128" rx="28" fill="#0a0a0a"/>
-  <rect x="5" y="5" width="118" height="118" rx="23" fill="none" stroke="#34383c" stroke-width="3"/>
+  <title id="title">ChatGPT for SCI formula mark</title>
+  <circle cx="64" cy="64" r="60" fill="#171717" stroke="#777777" stroke-width="3"/>
   <path d="M30 88V55c0-16 8-25 23-25 5 0 10 1 14 3l-5 13c-3-1-5-2-8-2-6 0-9 4-9 12v4h16v14H45v14H30Z" fill="#ffffff"/>
-  <path d="m63 88 14-21-13-19h18l5 9 5-9h18L97 67l14 21H93l-6-10-6 10H63Z" fill="#8b91ff"/>
+  <path d="m63 88 14-21-13-19h18l5 9 5-9h18L97 67l14 21H93l-6-10-6 10H63Z" fill="#ffffff"/>
 </svg>

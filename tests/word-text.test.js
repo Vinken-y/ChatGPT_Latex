@@ -4,12 +4,36 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 const {
   getScriptToken,
+  parseGeminiTextLatex,
   parseScientificLabelLatex,
   parseSimpleIonLatex,
   parseStandaloneTextScripts,
   parseWordTextLatex,
   splitUnicodeScripts
 } = require("../src/word-text.js");
+
+test("converts Gemini text notation while preserving genuine equations", () => {
+  const cases = [
+    [String.raw`\text{Me}_2\text{O}`, "Me<sub>2</sub>O"],
+    [String.raw`\text{A}/\text{B}_2\text{N}`, "A/B<sub>2</sub>N"],
+    [String.raw`\text{Ca}(\text{OH})_2`, "Ca(OH)<sub>2</sub>"],
+    [String.raw`[\text{A}^+][\text{B}_2^-]`, "[A<sup>+</sup>][B<sub>2</sub><sup>−</sup>]"],
+    [String.raw`{}^{2}\text{C}`, "<sup>2</sup>C"],
+    [String.raw`^{12, 15}`, "<sup>12, 15</sup>"],
+    [String.raw`\text{p}K_\text{a}`, "pK<sub>a</sub>"],
+    [String.raw`2\text{ mA cm}^{-2}`, "2 mA cm<sup>−2</sup>"]
+  ];
+  for (const [latex, expected] of cases) {
+    assert.equal(parseGeminiTextLatex(latex)?.html, "<span>" + expected + "</span>", latex);
+  }
+  for (const latex of [
+    String.raw`x_i^2`, String.raw`\frac{\text{A}_2}{\text{B}_2}`,
+    String.raw`\text{A}_2+\text{B}_2\to\text{C}`, String.raw`T\Delta S_\text{ref}`,
+    String.raw`\text{A}_2<\text{B}_2`, String.raw`\text{Ca}(\text{OH}_2`, String.raw`\text{Na}__2`
+  ]) {
+    assert.equal(parseGeminiTextLatex(latex), null, latex);
+  }
+});
 
 test("formats molecular formulas and charged labels as Word text", () => {
   assert.deepEqual(parseScientificLabelLatex(String.raw`\mathrm{C_2}`), {

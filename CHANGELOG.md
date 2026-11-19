@@ -1,8 +1,100 @@
 # Changelog / 更新日志
 
-All notable changes to ChatGPT_Latex are documented here. Dates use ISO 8601.
+All notable changes to ChatGPT for SCI are documented here. Dates use ISO 8601.
 
-本文件记录 ChatGPT_Latex 的重要变更，日期使用 ISO 8601 格式。
+本文件记录 ChatGPT for SCI 的重要变更，日期使用 ISO 8601 格式。
+
+## [1.5.2] - 2026-11-19
+
+### Changed / 变更
+
+- Removed the font style shortcut and list the bundled Source fonts by their family names. Existing selections carry over.
+- 删除字体风格快捷按钮，下拉菜单显示实际字体名，保留已有选择。
+
+## 1.5.1 - 2026-11-19
+
+### Changed / 变更
+
+- Simplified the Typography panel with a new tab icon, compact settings rows, and the Claude preset beside the preview.
+- 更新字体标签图标，移除重复标题，调整设置行间距，并将 Claude 风格快捷按钮移至预览区。
+
+## 1.5.0 - 2026-11-19
+
+### Changed / 变更
+
+- Replaced per-area font preferences with independent page-wide Chinese and English fonts and a bilingual preview.
+- 将分区域字体设置合并为整页中文和英文字体，并新增中英文预览。
+- Added common system fonts and bundled Arimo and Tinos as offline substitutes for Arial and Times New Roman.
+- 新增常见系统字体，内置 Arimo 和 Tinos 作为 Arial 和 Times New Roman 的离线后备。
+
+## 1.4.1 - 2026-11-19
+
+### Changed / 变更
+
+- Restyled the popup, menus, and formula editor with a monochrome Ollama-inspired palette.
+- 弹窗、展开菜单和公式编辑器改用 Ollama 风格的黑白灰配色。
+
+### Fixed / 修复
+
+- Give the browser action popup an intrinsic width of 384 CSS pixels so labels and controls have room on one line.
+- 将原生扩展弹窗的内容宽度设为 384 CSS 像素，防止标题、设置名称和选项被挤成多行。
+
+## 1.4.0 - 2026-11-19
+
+### Changed / 变更
+
+- Renamed the extension to ChatGPT for SCI and reorganized the popup into separate Typography and Copy tabs with system light and dark themes.
+- 扩展更名为 ChatGPT for SCI，弹窗拆分为「字体」和「复制」两个页面，并随系统切换明暗主题。
+- Added a live preview of message fonts and bold text color. Existing preferences carry over.
+- 新增消息字体和加粗颜色的即时预览，保留现有偏好设置。
+- Updated the opened font menus, the color panel with presets and HEX entry, and the formula editor to use the same visual style.
+- 字体下拉菜单、带预设色和 HEX 输入的颜色面板、公式编辑器采用统一视觉样式。
+
+## 1.3.4 - 2026-11-19
+
+### Added / 新增
+
+- Added an optional custom color for bold text in ChatGPT messages and writing panels.
+- 新增 ChatGPT 对话与写作面板的加粗文字颜色，可单独开启和自定义。
+
+## 1.3.3 - 2026-11-19
+
+### Fixed / 修复
+
+- Let sent messages and live input follow the reply font by default, and offer a separate choice for both user-facing text areas.
+- 已发送消息和实时输入默认跟随回复字体，也支持单独设置这两处的字体。
+- Apply the selected text font to rich editor content and placeholder text.
+- 将所选字体应用于富文本输入和占位文字。
+
+## 1.3.2 - 2026-11-19
+
+### Fixed / 修复
+
+- Apply the selected fonts to newly sent user messages and to assistant replies during streaming and after completion.
+- 新发送的用户消息即时应用界面字体，ChatGPT 回复在生成中和生成完成后统一使用回复字体。
+
+## 1.3.1 - 2026-11-19
+
+### Fixed / 修复
+
+- Apply reply typography to ChatGPT's current response renderer, including lists and tables, and use installed Noto Serif SC for Chinese text in the serif preset.
+- 将回复字体应用于 ChatGPT 新版正文、列表和表格，并在衬线预设中优先使用系统已安装的思源宋体系列中文字体。
+
+## 1.3.0 - 2026-11-19
+
+### Added / 新增
+
+- Added separate ChatGPT interface and reply fonts with a Claude-style preset and offline Source Sans 3 and Source Serif 4 fonts.
+- 新增独立的 ChatGPT 界面与回复字体设置，提供 Claude 风格预设，离线内置 Source Sans 3 和 Source Serif 4。
+
+## 1.2.1 - 2026-11-19
+
+### Fixed / 修复
+
+- Preserve Gemini's text-like chemical labels, unit exponents, and superscript references as Word text while retaining genuine equations as MathML.
+- 将 Gemini 的文本型化学记号、单位指数和上标引用转换为 Word 文本，真正的公式仍使用 MathML。
+- Preserve the complete math node at a selection boundary, use Gemini's rendered LaTeX annotation when available, and keep unrendered tokens as text so they cannot block mixed copying.
+- 选区边界保留完整公式节点，优先读取 Gemini 渲染后的 LaTeX 注释，并将渲染失败的片段作为文本保留，避免整段复制失败。
 
 ## [1.2.0] - 2026-10-15
 
@@ -161,6 +253,7 @@ All notable changes to ChatGPT_Latex are documented here. Dates use ISO 8601.
 - Added automated source checks, manifest/localization validation, unit tests, and extension fixtures.
 - 新增源码语法检查、Manifest/本地化校验、单元测试和扩展测试页面。
 
+[1.5.2]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.5.2
 [1.2.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.2.0
 [1.1.2]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.2
 [1.1.1]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.1.1

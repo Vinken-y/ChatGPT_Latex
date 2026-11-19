@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Chat typography regression</title>
+  <style>
+    body { color: #222; font-family: Arial, sans-serif; }
+    [data-theme="dark"] body { color: #ddd; background: #222; }
+    [data-d-text-flow], [data-thread-reading-passage], strong, td { font-family: Arial, sans-serif !important; }
+    code, pre, .katex { color: #738096; font-family: monospace; }
+    code [data-d-text-flow] { font-family: inherit !important; }
+    [data-composer-markdown] :is(p, span), [data-placeholder]::before {
+      font-family: Arial, sans-serif !important;
+    }
+    [data-placeholder]:empty::before { content: attr(data-placeholder); }
+  </style>
+</head>
+<body>
+  <nav id="navigation">Navigation</nav>
+  <div data-composer-body>
+    <div data-composer-markdown id="prompt-textarea" role="textbox" contenteditable="true">
+      <p aria-hidden="true" id="input-placeholder" data-placeholder="Enter a prompt"></p>
+    </div>
+    <button id="composer-button" type="button"><b id="button-bold">Send</b></button>
+  </div>
+  <main id="conversation">
+    <section data-response-body>
+      <div data-markdown-text-style="assistant-message">
+        <div data-dil-response><p id="old-reply" data-d-text-flow>Earlier reply 中文。 <b id="reply-bold">Bold detail</b></p></div>
+      </div>
+    </section>
+  </main>
+  <div data-testid="chatgpt-writing-block">
+    <div class="writing-block-editor"><h2 id="writing-title">Title</h2><p>Draft <strong id="writing-bold">emphasis</strong>.</p></div>
+  </div>
+  <div id="outside"><b id="outside-bold">Unrelated text</b></div>
+  <template id="sent-message">
+    <div data-user-message-bubble="true">
+      <span id="plain-user">Plain prompt.</span>
+      <div class="rich-text-user-turn">
+        <p id="rich-user" data-thread-reading-passage>Rich prompt 中文。 <strong id="user-bold">Bold prompt</strong></p>
+        <ol><li id="user-list">First point</li></ol>
+      </div>
+    </div>
+  </template>
+  <template id="streaming-reply">
+    <div data-markdown-text-style="assistant-message">
+      <p id="new-reply">Starting response 中文。 <strong id="stream-bold">Bold fragment</strong></p>
+    </div>
+  </template>
+  <template id="finalized-reply">
+    <div data-dil-response>
+      <p id="new-reply" data-d-text-flow>Final response <strong id="emphasis">with emphasis</strong>.</p>
+      <table><tbody><tr><td id="cell">Table cell</td></tr></tbody></table>
+      <p><code><span id="code" data-d-text-flow><b id="code-bold">code sample</b></span></code></p>
+      <span class="katex"><i id="math"><b id="math-bold">x + y</b></i></span>
+    </div>
+  </template>
+</body>
+</html>

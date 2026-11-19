@@ -56,6 +56,7 @@
   ]);
   const SAFE_HREF = /^(?:https?:|mailto:|tel:|#|\/)/i;
   const WORD_NORMAL_BLOCK_TAGS = new Set(["BLOCKQUOTE", "DIV", "LI", "P"]);
+  const CHEMICAL_GROUPS = new Set(["Ac", "Bu", "Et", "Me", "Ph", "Pr"]);
   const WORD_BLOCK_TAGS = new Set([
     "BLOCKQUOTE", "BODY", "DIV", "H1", "H2", "H3", "H4", "H5", "H6",
     "LI", "OL", "P", "TABLE", "TBODY", "TD", "TFOOT", "TH", "THEAD", "TR", "UL"
@@ -358,6 +359,98 @@
     return parseScientificLabelLatex(input) || parseSimpleScalarLatex(input);
   }
 
+  function parseGeminiTextLatex(source) {
+    if (source.length > 180) {
+      return null;
+    }
+    const citation = source.match(/^(?:\{\})?\^\{(\d+(?:\s*[,–-]\s*\d+)+)\}$/);
+    if (citation) {
+      return { html: "<span><sup>" + citation[1] + "</sup></span>", plainText: citation[1] };
+    }
+    if (!/\\(?:text|mathrm)\s*\{/.test(source)) {
+      return null;
+    }
+
+    const value = unwrapIonFormatting(source);
+    const unit = value.match(/^(\d+(?:\.\d+)? )?((?:[A-Za-zµμΩ]+\s+)*[A-Za-zµμΩ]+)\^\{([+\-−]\d+)\}$/);
+    if (unit && /^(?:[kcmµμun]?(?:m|s|g|A|V|W|Hz|Pa|mol|L|F|Ω))$/.test(unit[2].split(/\s+/).at(-1))) {
+      const base = (unit[1] || "") + unit[2];
+      const exponent = unit[3].replace("-", "−");
+      return { html: "<span>" + base + "<sup>" + exponent + "</sup></span>", plainText: base + toUnicodeSuperscript(exponent) };
+    }
+
+    const compact = value.replace(/\s+/g, "");
+    if (compact === "pK_a" || compact === "pK_{a}") {
+      return { html: "<span>pK<sub>a</sub></span>", plainText: "pKa" };
+    }
+
+    const notation = unwrapIonFormatting(source.replace(/\\(?:text|mathrm)\s*\{([A-Z]+)\}/g, "{$1}"))
+      .replace(/\s+/g, "").replace(/^\{\}/, "");
+    const stack = [];
+    let html = "";
+    let plainText = "";
+    let position = 0;
+    let lastToken = "";
+    let hasScript = false;
+    let hasElement = false;
+    while (position < notation.length) {
+      const rest = notation.slice(position);
+      const wrappedLabel = /^\{([A-Z]+)\}/.exec(rest);
+      const element = /^[A-Z][a-z]?/.exec(rest)?.[0];
+      if (wrappedLabel || (element && (CHEMICAL_ELEMENTS.has(element) || CHEMICAL_GROUPS.has(element)))) {
+        const base = wrappedLabel?.[1] ?? element;
+        html += base;
+        plainText += base;
+        position += wrappedLabel?.[0].length ?? base.length;
+        lastToken = "base";
+        hasElement = true;
+        continue;
+      }
+
+      const marker = rest[0];
+      if (marker === "_" || marker === "^") {
+        const script = marker === "_"
+          ? /^_(?:\{(\d+)\}|(\d))/.exec(rest)
+          : /^\^(?:\{([+\-−\d]+)\}|([+\-−\d]))/.exec(rest);
+        const text = script?.[1] ?? script?.[2];
+        const leadingIsotope = position === 0 && marker === "^" && /^\d+$/.test(text || "");
+        const canAttachScript = lastToken === "base" || (lastToken === "sub" && marker === "^");
+        if (!text || (!canAttachScript && !leadingIsotope) ||
+            (marker === "^" && !leadingIsotope && !/^(?:\d*[+\-−]|[+\-−]\d*)$/.test(text))) {
+          return null;
+        }
+        const tag = marker === "_" ? "sub" : "sup";
+        const normalized = text.replace("-", "−");
+        html += "<" + tag + ">" + normalized + "</" + tag + ">";
+        plainText += normalized;
+        position += script[0].length;
+        hasScript = true;
+        lastToken = tag;
+        continue;
+      }
+
+      if (marker === "(" || marker === "[") {
+        stack.push(marker === "(" ? ")" : "]");
+        lastToken = "open";
+      } else if (marker === ")" || marker === "]") {
+        if (stack.pop() !== marker || !["base", "sub", "sup"].includes(lastToken)) {
+          return null;
+        }
+        lastToken = "base";
+      } else if ("-/–—".includes(marker) && /^[A-Z(\[{]/.test(rest.slice(1)) &&
+                 (["base", "sub", "sup"].includes(lastToken) || (position === 0 && marker !== "/"))) {
+        lastToken = "separator";
+      } else {
+        return null;
+      }
+      html += marker;
+      plainText += marker;
+      position += 1;
+    }
+
+    return hasElement && hasScript && stack.length === 0 ? { html: "<span>" + html + "</span>", plainText } : null;
+  }
+
   function parseSimpleIonLatex(input) {
     return parseScientificLabelLatex(input);
   }
@@ -640,6 +733,7 @@
     parseSimpleIonLatex,
     parseStandaloneTextScripts,
     parseWordTextLatex,
+    parseGeminiTextLatex,
     removeSourceBold,
     sanitizeElement,
     splitUnicodeScripts

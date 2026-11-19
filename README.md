@@ -1,12 +1,12 @@
-# ChatGPT_Latex
+# ChatGPT for SCI
 
-![ChatGPT_Latex icon](icons/128.png)
+![ChatGPT for SCI icon](icons/128.png)
 
 [![CI](https://github.com/Vinken-y/ChatGPT_Latex/actions/workflows/ci.yml/badge.svg)](https://github.com/Vinken-y/ChatGPT_Latex/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/Vinken-y/ChatGPT_Latex)](https://github.com/Vinken-y/ChatGPT_Latex/releases/latest)
 [![License](https://img.shields.io/github/license/Vinken-y/ChatGPT_Latex)](LICENSE)
 
-ChatGPT_Latex is a lightweight Manifest V3 extension for moving scientific content from supported AI chat pages into Microsoft Word. Hover a recognized formula to copy the complete Word equation; select prose, formulas, or both to copy a Word-ready rich selection with real superscript and subscript formatting.
+ChatGPT for SCI customizes ChatGPT typography and moves scientific content from supported AI chat pages into Microsoft Word. Hover a recognized formula to copy the complete Word equation; select prose, formulas, or both to copy a Word-ready rich selection with real superscript and subscript formatting.
 
 [简体中文](README.zh-CN.md) | [Privacy](PRIVACY.md) | [Security](SECURITY.md) | [Performance](docs/PERFORMANCE.md) | [Changelog](CHANGELOG.md)
 
@@ -43,11 +43,28 @@ The extension reads formula-related DOM on these explicitly matched sites. Selec
 
 ### GitHub release
 
-1. Download `ChatGPT_Latex-v1.2.0.zip` from the [v1.2.0 release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.2.0).
+1. Download `ChatGPT_for_SCI-v1.5.2.zip` from the [v1.5.2 release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.5.2).
 2. Extract the archive.
 3. Open `chrome://extensions` or `edge://extensions`.
 4. Enable **Developer mode**.
-5. Select **Load unpacked** and choose the extracted `ChatGPT_Latex-v1.2.0` directory. After updating, reload the extension and refresh open chat pages.
+5. Select **Load unpacked** and choose the extracted extension folder. After updating, reload the extension and refresh open chat pages.
+
+### ChatGPT fonts
+
+In the **Typography** tab, select Chinese and English fonts independently.
+The same choices apply across ChatGPT, including navigation, message text,
+the input editor, and writing panels. Set both to **Page default** to restore
+the site's typography. Changes apply immediately and are saved locally.
+Use the **Copy** tab for recognition and clipboard settings.
+
+Turn on **Bold text color** and choose a color to highlight explicit bold
+emphasis in messages and writing panels. Turn it off to restore the page colors.
+
+Arial and Times New Roman use the installed fonts when available, with bundled
+Arimo and Tinos as offline alternatives. Chinese choices use system fonts.
+Source Sans 3 and Source Serif 4 are also bundled. Math and icon renderers
+keep their own fonts. Fonts are a display preference and do not
+change the Word copy workflow.
 
 ### Source checkout
 
@@ -131,8 +148,8 @@ Contributions are welcome through [CONTRIBUTING.md](CONTRIBUTING.md). Please rep
 
 ## Trademark notice
 
-ChatGPT, OpenAI, Microsoft Word, Claude, DeepSeek, Gemini, Copilot, Chrome, Edge, KaTeX, and Revolut are trademarks or product names of their respective owners. ChatGPT_Latex is an independent project and is not affiliated with, endorsed by, or sponsored by those owners.
+ChatGPT, OpenAI, Microsoft Word, Claude, DeepSeek, Gemini, Copilot, Chrome, Edge, KaTeX, and Revolut are trademarks or product names of their respective owners. ChatGPT for SCI is an independent project and is not affiliated with, endorsed by, or sponsored by those owners.
 
 ## License
 
-ChatGPT_Latex is released under the [MIT License](LICENSE).
+ChatGPT for SCI is released under the [MIT License](LICENSE).

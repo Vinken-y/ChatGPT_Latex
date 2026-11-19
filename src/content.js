@@ -8,11 +8,12 @@
   const QUICK_ACTIONS_ID = "chatgpt-latex-quick-actions";
   const SELECTION_ACTIONS_ID = "chatgpt-latex-selection-actions";
   const TOAST_ID = "chatgpt-latex-toast";
+  const GEMINI_INLINE_MATH_SELECTOR = ".math-inline[data-math]";
+  const GEMINI_MATH_SELECTOR = `${GEMINI_INLINE_MATH_SELECTOR}, .math-block[data-math]`;
   const FORMULA_SELECTOR = [
     ".katex-display",
     ".katex",
-    ".math-block[data-math]",
-    ".math-inline[data-math]",
+    GEMINI_MATH_SELECTOR,
     "[data-math-source]",
     "[data-latex]",
     "[data-tex]",
@@ -153,6 +154,15 @@
   }
 
   function extractLatex(formula) {
+    if (formula.matches(GEMINI_MATH_SELECTOR)) {
+      if (formula.querySelector(".katex-error")) {
+        return "";
+      }
+      const renderedSource = findTexAnnotation(formula)?.textContent;
+      if (renderedSource?.trim()) {
+        return renderedSource;
+      }
+    }
     const sourceAttributes = [
       "data-math",
       "data-math-source",
@@ -205,10 +215,11 @@
       return cached;
     }
 
-    const classification = {
-      wordText: latex ? wordText.parseWordTextLatex(latex) : null,
-      latex
-    };
+    let textPayload = latex ? wordText.parseWordTextLatex(latex) : null;
+    if (latex && !textPayload && formula.matches(GEMINI_INLINE_MATH_SELECTOR)) {
+      textPayload = wordText.parseGeminiTextLatex(latex);
+    }
+    const classification = { wordText: textPayload, latex };
     formulaClassifications.set(formula, classification);
     return classification;
   }
@@ -571,7 +582,8 @@
     while (node) {
       const parent = node.parentElement;
       const formula = canonicalFormula(parent?.closest(FORMULA_SELECTOR));
-      const insideEquation = formula && !classifyFormula(formula).wordText;
+      const classification = formula ? classifyFormula(formula) : null;
+      const insideEquation = classification?.latex && !classification.wordText;
       if (!insideEquation) {
         try {
           if (range.intersectsNode(node)) {
@@ -598,15 +610,15 @@
     return false;
   }
 
-  function expandTextLabelBoundaries(range) {
+  function expandFormulaBoundaries(range) {
     const expanded = range.cloneRange();
-    const startLabel = elementFromNode(range.startContainer)?.closest("[data-wlc-text-label]");
-    const endLabel = elementFromNode(range.endContainer)?.closest("[data-wlc-text-label]");
-    if (startLabel) {
-      expanded.setStartBefore(startLabel);
+    const startFormula = canonicalFormula(findFormula(elementFromNode(range.startContainer)));
+    const endFormula = canonicalFormula(findFormula(elementFromNode(range.endContainer)));
+    if (startFormula && classifyFormula(startFormula).latex) {
+      expanded.setStartBefore(startFormula);
     }
-    if (endLabel) {
-      expanded.setEndAfter(endLabel);
+    if (endFormula && classifyFormula(endFormula).latex) {
+      expanded.setEndAfter(endFormula);
     }
     return expanded;
   }
@@ -726,7 +738,7 @@
   }
 
   function captureSelectionSnapshot(range) {
-    const copyRange = expandTextLabelBoundaries(range);
+    const copyRange = expandFormulaBoundaries(range);
     return {
       fragment: copyRange.cloneContents(),
       plainText: copyRange.toString(),
@@ -1259,7 +1271,7 @@
     const heading = document.createElement("div");
     const title = document.createElement("h2");
     title.id = "wlc-title";
-    title.textContent = "ChatGPT_Latex";
+    title.textContent = translate("extensionName", "ChatGPT for SCI");
     const subtitle = document.createElement("p");
     subtitle.textContent = translate("editorSubtitle", "Normalized LaTeX with Word-ready copy");
     heading.append(title, subtitle);

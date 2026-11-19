@@ -1,6 +1,6 @@
-# ChatGPT_Latex
+# ChatGPT for SCI
 
-ChatGPT_Latex 是一个轻量级 Chrome Manifest V3 扩展，用于将 AI 聊天页面中的科学内容复制到 Microsoft Word。鼠标悬停公式后可复制完整 Word 公式；选中正文、公式或两者混合内容后，可一次性复制为适配 Word 的富文本。
+ChatGPT for SCI 可自定义 ChatGPT 字体，并将受支持的 AI 聊天页面中的科学内容复制到 Microsoft Word。鼠标悬停公式后可复制完整 Word 公式；选中正文、公式或两者混合内容后，可一次性复制为适配 Word 的富文本。
 
 [English](README.md) | [隐私说明](PRIVACY.md) | [安全政策](SECURITY.md) | [性能审查](docs/PERFORMANCE.md) | [更新日志](CHANGELOG.md)
 
@@ -37,11 +37,24 @@ ChatGPT_Latex 是一个轻量级 Chrome Manifest V3 扩展，用于将 AI 聊天
 
 ### GitHub 正式版
 
-1. 从 [v1.2.0 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.2.0) 下载 `ChatGPT_Latex-v1.2.0.zip`。
+1. 从 [v1.5.2 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.5.2) 下载 `ChatGPT_for_SCI-v1.5.2.zip`。
 2. 解压该文件。
 3. 打开 `chrome://extensions` 或 `edge://extensions`。
 4. 开启“开发者模式”。
-5. 点击“加载已解压的扩展程序”，选择解压后的 `ChatGPT_Latex-v1.2.0` 目录。更新后重新加载插件，并刷新已打开的聊天页面。
+5. 点击“加载已解压的扩展程序”，选择解压后的插件目录。更新后重新加载插件，并刷新已打开的聊天页面。
+
+### ChatGPT 字体
+
+在「字体」页分别选择中文和英文字体，同一设置应用到 ChatGPT 的侧栏、对话、输入框和写作面板。
+两项均设为「网页默认」即可恢复原样。设置即时生效并保存在本机。
+识别与剪贴板设置位于「复制」页。
+
+打开「加粗文字颜色」并选择色块，可为聊天和写作面板中明确加粗的文字上色。
+关闭开关即可恢复网页颜色。
+
+Arial 和 Times New Roman 优先使用系统字体，缺失时使用插件内置的 Arimo 和 Tinos
+作为离线后备。安装包同时内置 Source Sans 3 和 Source Serif 4，中文选项使用系统字体。
+公式与图标仍使用各自的渲染字体，页面字体设置不改变 Word 复制流程。
 
 ### 源码安装
 
@@ -125,8 +138,8 @@ npm test
 
 ## 商标与关联声明
 
-ChatGPT、OpenAI、Microsoft Word、Claude、DeepSeek、Gemini、Copilot、Chrome、Edge、KaTeX 和 Revolut 均为各自权利人的商标或产品名称。ChatGPT_Latex 是独立项目，与上述权利人不存在关联，也未获得其认可或赞助。
+ChatGPT、OpenAI、Microsoft Word、Claude、DeepSeek、Gemini、Copilot、Chrome、Edge、KaTeX 和 Revolut 均为各自权利人的商标或产品名称。ChatGPT for SCI 是独立项目，与上述权利人不存在关联，也未获得其认可或赞助。
 
 ## 许可证
 
-ChatGPT_Latex 使用 [MIT License](LICENSE) 开源。
+ChatGPT for SCI 使用 [MIT License](LICENSE) 开源。

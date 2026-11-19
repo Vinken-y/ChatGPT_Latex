@@ -3,20 +3,100 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ChatGPT_Latex</title>
+    <title>ChatGPT for SCI</title>
     <link rel="stylesheet" href="popup.css">
   </head>
   <body>
     <main>
-      <header>
-        <div class="mark" aria-hidden="true">fx</div>
-        <div>
-          <h1 data-i18n="extensionName">ChatGPT_Latex</h1>
-          <p data-i18n="popupSubtitle">Formula copy settings</p>
-        </div>
+      <header class="masthead">
+        <img class="mark" src="icons/48.png" width="36" height="36" alt="">
+        <h1 data-i18n="extensionName">ChatGPT for SCI</h1>
+        <span id="version" class="version"></span>
       </header>
 
-      <section aria-labelledby="feature-title">
+      <span id="settings-label" data-i18n="settingsTabs" hidden>Settings</span>
+      <div class="tabs" role="tablist" aria-labelledby="settings-label">
+        <button id="fonts-tab" type="button" role="tab" aria-selected="true" aria-controls="fonts-panel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7V4h16v3M12 4v16m-3 0h6"/></svg>
+          <span data-i18n="fontsTab">Typography</span>
+        </button>
+        <button id="copy-tab" type="button" role="tab" aria-selected="false" aria-controls="copy-panel" tabindex="-1">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 4H6a2 2 0 0 0-2 2v10"/></svg>
+          <span data-i18n="copyTab">Copy</span>
+        </button>
+      </div>
+
+      <section id="fonts-panel" class="panel font-card" role="tabpanel" aria-labelledby="fonts-tab">
+        <label class="setting">
+          <strong data-i18n="chineseFont">Chinese font</strong>
+          <select data-setting="chatgptChineseFont">
+            <option value="default" data-i18n="defaultFont">Page default</option>
+            <option value="simsun" data-i18n="simsunFont">SimSun</option>
+            <option value="yahei" data-i18n="yaheiFont">Microsoft YaHei</option>
+            <option value="kaiti" data-i18n="kaitiFont">KaiTi</option>
+            <option value="noto-serif" data-i18n="notoSerifFont">Noto Serif SC</option>
+            <option value="noto-sans" data-i18n="notoSansFont">Noto Sans SC</option>
+          </select>
+        </label>
+        <label class="setting">
+          <strong data-i18n="englishFont">English font</strong>
+          <select data-setting="chatgptEnglishFont">
+            <option value="default" data-i18n="defaultFont">Page default</option>
+            <option value="times-new-roman">Times New Roman</option>
+            <option value="arial">Arial</option>
+            <option value="calibri">Calibri</option>
+            <option value="cambria">Cambria</option>
+            <option value="georgia">Georgia</option>
+            <option value="source-serif">Source Serif 4</option>
+            <option value="source-sans">Source Sans 3</option>
+          </select>
+        </label>
+        <div class="setting">
+          <label for="bold-color-enabled"><strong data-i18n="boldTextColor">Bold text color</strong></label>
+          <div class="color-controls">
+            <span id="bold-color-picker-label" data-i18n="boldColorPicker" hidden>Choose bold text color</span>
+            <button id="color-trigger" type="button" popovertarget="color-panel" aria-labelledby="bold-color-picker-label">
+              <span class="color-chip" aria-hidden="true"></span>
+            </button>
+            <input id="bold-color-enabled" data-setting="chatgptBoldColorEnabled" type="checkbox">
+          </div>
+        </div>
+        <div id="color-panel" popover="auto" role="group" aria-labelledby="color-panel-title">
+          <h2 id="color-panel-title" data-i18n="boldTextColor">Bold text color</h2>
+          <div class="palette" aria-labelledby="color-panel-title">
+            <button type="button" data-color="#a54b31" aria-label="#A54B31"></button>
+            <button type="button" data-color="#26705a" aria-label="#26705A"></button>
+            <button type="button" data-color="#3571bb" aria-label="#3571BB"></button>
+            <button type="button" data-color="#7b4baa" aria-label="#7B4BAA"></button>
+            <button type="button" data-color="#b03d58" aria-label="#B03D58"></button>
+            <button type="button" data-color="#a0691b" aria-label="#A0691B"></button>
+          </div>
+          <form id="color-form" novalidate>
+            <label for="color-hex">HEX</label>
+            <input id="color-hex" type="text" maxlength="7" spellcheck="false" autocomplete="off" aria-describedby="color-error">
+            <button class="preset" type="submit" data-i18n="applyColor">Apply</button>
+            <p id="color-error" role="status" hidden data-i18n="invalidColor">Enter a six-digit HEX color.</p>
+          </form>
+          <label class="custom-color" for="bold-color">
+            <span data-i18n="customColor">Custom color</span>
+            <input id="bold-color" data-setting="chatgptBoldColor" type="color" value="#a54b31">
+          </label>
+        </div>
+        <figure id="font-preview" class="font-preview">
+          <figcaption data-i18n="fontPreview">Preview</figcaption>
+          <div class="preview-line">
+            <span class="preview-role" data-i18n="chineseFont">Chinese font</span>
+            <p lang="zh-CN">对比两组数据。<strong>趋势一致。</strong></p>
+          </div>
+          <div class="preview-line">
+            <span class="preview-role" data-i18n="englishFont">English font</span>
+            <p lang="en">The trend is <strong>consistent.</strong></p>
+          </div>
+        </figure>
+      </section>
+
+      <div id="copy-panel" class="panel copy-card" role="tabpanel" aria-labelledby="copy-tab" hidden>
+      <section class="copy-group" aria-labelledby="feature-title">
         <h2 id="feature-title" data-i18n="featureControls">Feature controls</h2>
 
         <label class="setting" for="formula-recognition">
@@ -37,7 +117,7 @@
 
       </section>
 
-      <section aria-labelledby="behavior-title">
+      <section class="copy-group" aria-labelledby="behavior-title">
         <h2 id="behavior-title" data-i18n="copyBehavior">Copy behavior</h2>
 
         <label class="setting" for="remove-bold-formatting">
@@ -72,14 +152,11 @@
           <input id="close-after-copy" data-setting="closeAfterCopy" type="checkbox">
         </label>
       </section>
-
-      <div class="usage">
-        <span data-i18n="pageFormula">Page formula</span>
-        <strong data-i18n="doubleClickEditor">Double-click to edit</strong>
       </div>
 
-      <p class="status" id="status" role="status" data-i18n="settingsSaved">Settings saved</p>
+      <p class="status" id="status" role="status"></p>
     </main>
+    <script src="src/font-settings.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

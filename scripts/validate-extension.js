@@ -61,6 +61,12 @@ for (const contentScript of manifest.content_scripts || []) {
 for (const iconPath of Object.values(manifest.icons || {})) {
   requireFile(iconPath);
 }
+
+for (const assetGroup of manifest.web_accessible_resources || []) {
+  for (const asset of assetGroup.resources) {
+    requireFile(asset);
+  }
+}
 for (const iconPath of Object.values(manifest.action?.default_icon || {})) {
   requireFile(iconPath);
 }
@@ -96,4 +102,4 @@ if (!declaredKatex || declaredKatex !== bundledKatex.version) {
   fail(`Bundled KaTeX ${bundledKatex.version} must equal exact package dependency ${declaredKatex || "missing"}`);
 }
 
-console.log(`Validated ChatGPT_Latex ${manifest.version}: ${locales.length} locales, KaTeX ${bundledKatex.version}.`);
+console.log(`Validated ChatGPT for SCI ${manifest.version}: ${locales.length} locales, KaTeX ${bundledKatex.version}.`);
