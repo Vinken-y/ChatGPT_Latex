@@ -13,7 +13,7 @@
   --solid-ink: #ffffff;
   --solid-hover: #363636;
   --switch-track: #767676;
-  --focus: #3b82f6;
+  --focus: #137358;
   --error: #9d2923;
 }
 
@@ -32,7 +32,7 @@
     --solid-ink: #171717;
     --solid-hover: #dedede;
     --switch-track: #656565;
-    --focus: #8ab6ff;
+    --focus: #85e7be;
     --error: #ffb4aa;
   }
 }
@@ -59,14 +59,14 @@ h1, h2, p, figure { margin: 0; }
 .masthead {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   min-block-size: 66px;
   margin-block-end: 12px;
   border-block-end: 1px solid var(--line);
 }
 
-.mark { flex: none; }
-.masthead h1 { font: 600 16px/1.35 "SF Pro Rounded", system-ui, sans-serif; }
+.mark { flex: none; inline-size: 32px; block-size: 32px; }
+.masthead h1 { font-size: 17px; font-weight: 650; line-height: 1.2; }
 .version {
   margin-inline-start: auto;
   color: var(--muted);

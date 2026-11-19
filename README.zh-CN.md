@@ -1,5 +1,7 @@
 # ChatFacet
 
+![ChatFacet 图标](icons/128.png)
+
 ChatFacet 是一个网页版 AI 聊天的视觉与交互增强工具。可以分别调整 ChatGPT 和 Gemini 的字体与加粗颜色，还可以通过选区工具条，将带格式的文字和可编辑公式复制到 Microsoft Word。
 
 [English](README.md) | [隐私说明](PRIVACY.md) | [安全政策](SECURITY.md) | [性能审查](docs/PERFORMANCE.md) | [更新日志](CHANGELOG.md)
@@ -37,13 +39,13 @@ ChatFacet 是一个网页版 AI 聊天的视觉与交互增强工具。可以分
 
 ### GitHub 正式版
 
-1. 从 [v1.7.0 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.7.0) 下载 `ChatFacet-v1.7.0.zip`。
+1. 从 [v1.7.1 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.7.1) 下载 `ChatFacet-v1.7.1.zip`。
 2. 解压该文件。
 3. 打开 `chrome://extensions` 或 `edge://extensions`。
 4. 开启“开发者模式”。
 5. 点击“加载已解压的扩展程序”，选择解压后的插件目录。
 
-从 ChatGPT for SCI 升级时，更新原加载目录中的文件，再重新加载扩展并刷新聊天页。沿用原目录可保留本机设置。
+升级 ChatFacet 或 ChatGPT for SCI 时，更新原加载目录中的文件，再重新加载扩展并刷新聊天页。沿用原目录可保留本机设置。
 
 ### ChatGPT 和 Gemini 字体
 

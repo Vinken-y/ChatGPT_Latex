@@ -4,6 +4,11 @@ All notable changes to ChatFacet (formerly ChatGPT for SCI) are documented here.
 
 本文件记录 ChatFacet（原 ChatGPT for SCI）的重要变更，日期使用 ISO 8601 格式。
 
+## [1.7.1] - 2026-11-19
+
+- Updated the ChatFacet visual identity with a two-tone conversation mark and a coordinated popup header. Extension permissions and existing settings are unchanged.
+- 更新 ChatFacet 品牌识别：采用双色分面对话图标，并统一弹窗页眉。扩展权限和已有设置不变。
+
 ## [1.7.0] - 2026-11-19
 
 - Renamed the extension to ChatFacet to reflect its focus on visual and interaction enhancements for web AI chats. Existing preferences carry over in the same unpacked directory.
@@ -271,6 +276,7 @@ All notable changes to ChatFacet (formerly ChatGPT for SCI) are documented here.
 - Added automated source checks, manifest/localization validation, unit tests, and extension fixtures.
 - 新增源码语法检查、Manifest/本地化校验、单元测试和扩展测试页面。
 
+[1.7.1]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.7.1
 [1.7.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.7.0
 [1.6.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.6.0
 [1.5.2]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.5.2

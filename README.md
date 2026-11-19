@@ -43,13 +43,13 @@ The extension reads formula-related DOM on these explicitly matched sites. Selec
 
 ### GitHub release
 
-1. Download `ChatFacet-v1.7.0.zip` from the [v1.7.0 release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.7.0).
+1. Download `ChatFacet-v1.7.1.zip` from the [v1.7.1 release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.7.1).
 2. Extract the archive.
 3. Open `chrome://extensions` or `edge://extensions`.
 4. Enable **Developer mode**.
 5. Select **Load unpacked** and choose the extracted extension folder.
 
-Upgrading from ChatGPT for SCI? Update the files in the existing unpacked directory, then reload the extension and refresh your chat tabs. Keeping the same directory preserves your local preferences.
+Upgrading ChatFacet or ChatGPT for SCI? Update the files in the existing unpacked directory, then reload the extension and refresh your chat tabs. Keeping the same directory preserves your local preferences.
 
 ### ChatGPT and Gemini fonts
 

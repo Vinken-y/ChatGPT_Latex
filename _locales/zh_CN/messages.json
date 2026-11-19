@@ -13,7 +13,7 @@
   "customColor": { "message": "自定义取色" },
   "defaultFont": { "message": "网页默认" },
   "extensionName": { "message": "ChatFacet" },
-  "extensionDescription": { "message": "网页版 AI 聊天的视觉与交互增强工具，支持自定义字体、选区工具条与 Word 富文本复制。" },
+  "extensionDescription": { "message": "网页版 AI 对话的视觉与交互增强工具：自定义字体、选区工具条和 Word 富文本复制。" },
   "settingsTabs": { "message": "设置" },
   "fontsTab": { "message": "字体" },
   "appearanceSite": { "message": "网站" },

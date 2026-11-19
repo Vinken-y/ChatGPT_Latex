@@ -13,7 +13,7 @@
   "customColor": { "message": "Custom color" },
   "defaultFont": { "message": "Page default" },
   "extensionName": { "message": "ChatFacet" },
-  "extensionDescription": { "message": "Enhance AI chat on the web with custom typography, selection actions, and Word-ready copying." },
+  "extensionDescription": { "message": "Visual and interaction enhancer for web AI chats: typography, selection tools, and Word-ready copying." },
   "settingsTabs": { "message": "Settings" },
   "fontsTab": { "message": "Typography" },
   "appearanceSite": { "message": "Website" },

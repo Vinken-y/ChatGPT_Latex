@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
   <title id="title">ChatFacet icon</title>
-  <circle cx="64" cy="64" r="60" fill="#171717" stroke="#777777" stroke-width="3"/>
-  <path d="M76 37h14a13 13 0 0 1 13 13v22a13 13 0 0 1-13 13H55z" fill="#686868"/>
-  <path d="M38 37h52a13 13 0 0 1 13 13v22a13 13 0 0 1-13 13H55l-18 13V85a13 13 0 0 1-12-13V50a13 13 0 0 1 13-13zm38 0L55 85" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="#18332c" stroke="#527768" stroke-width="4"/>
+  <path d="M36 31h41L59 83H47L31 96a2 2 0 0 1-3-2V80a14 14 0 0 1-6-12V45a14 14 0 0 1 14-14Z" fill="#f6faf7"/>
+  <path d="M87 31h5a14 14 0 0 1 14 14v24a14 14 0 0 1-14 14H69Z" fill="#85e7be"/>
 </svg>
