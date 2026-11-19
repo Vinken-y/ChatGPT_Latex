@@ -1,7 +1,7 @@
 {
-  "name": "chatgpt-latex",
-  "version": "1.6.0",
-  "description": "Copy Word-ready equations and scientific text from AI chat pages.",
+  "name": "chatfacet",
+  "version": "1.7.0",
+  "description": "Visual and interaction enhancements for web AI chats.",
   "private": true,
   "license": "MIT",
   "repository": {

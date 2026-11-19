@@ -6,7 +6,7 @@ Effective date: 2026-08-09
 
 ## English
 
-ChatGPT for SCI processes formulas and user-selected text locally inside the browser extension.
+ChatFacet processes formulas and user-selected text locally inside the browser extension.
 
 - **Data read:** formula-related DOM content on the explicitly supported AI chat sites listed in `manifest.json`; the selected DOM range only after the user selects ordinary text.
 - **Purpose:** detect formulas, show local controls, normalize LaTeX, convert selected Unicode scientific scripts to Word rich text, and create clipboard content requested by the user.
@@ -21,7 +21,7 @@ Removing the extension deletes its extension storage according to the browser's 
 
 ## 中文
 
-ChatGPT for SCI 仅在浏览器扩展内部本地处理公式和用户主动选择的文本。
+ChatFacet 仅在浏览器扩展内部本地处理公式和用户主动选择的文本。
 
 - **读取的数据：** `manifest.json` 明确列出的受支持 AI 聊天站点中的公式相关 DOM；普通正文仅在用户完成文本选择后读取对应选区。
 - **用途：** 识别公式、显示本地控件、规范化 LaTeX、将所选 Unicode 科学上下标转换为 Word 富文本，并生成用户主动请求的剪贴板内容。

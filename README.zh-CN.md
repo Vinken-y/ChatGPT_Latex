@@ -1,6 +1,6 @@
-# ChatGPT for SCI
+# ChatFacet
 
-ChatGPT for SCI 可分别自定义 ChatGPT 和 Gemini 字体，并将受支持的 AI 聊天页面中的科学内容复制到 Microsoft Word。鼠标悬停公式后可复制完整 Word 公式；选中正文、公式或两者混合内容后，可一次性复制为适配 Word 的富文本。
+ChatFacet 是一个网页版 AI 聊天的视觉与交互增强工具。可以分别调整 ChatGPT 和 Gemini 的字体与加粗颜色，还可以通过选区工具条，将带格式的文字和可编辑公式复制到 Microsoft Word。
 
 [English](README.md) | [隐私说明](PRIVACY.md) | [安全政策](SECURITY.md) | [性能审查](docs/PERFORMANCE.md) | [更新日志](CHANGELOG.md)
 
@@ -37,11 +37,13 @@ ChatGPT for SCI 可分别自定义 ChatGPT 和 Gemini 字体，并将受支持�
 
 ### GitHub 正式版
 
-1. 从 [v1.6.0 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.6.0) 下载 `ChatGPT_for_SCI-v1.6.0.zip`。
+1. 从 [v1.7.0 Release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.7.0) 下载 `ChatFacet-v1.7.0.zip`。
 2. 解压该文件。
 3. 打开 `chrome://extensions` 或 `edge://extensions`。
 4. 开启“开发者模式”。
-5. 点击“加载已解压的扩展程序”，选择解压后的插件目录。更新后重新加载插件，并刷新已打开的聊天页面。
+5. 点击“加载已解压的扩展程序”，选择解压后的插件目录。
+
+从 ChatGPT for SCI 升级时，更新原加载目录中的文件，再重新加载扩展并刷新聊天页。沿用原目录可保留本机设置。
 
 ### ChatGPT 和 Gemini 字体
 
@@ -77,7 +79,7 @@ git clone https://github.com/Vinken-y/ChatGPT_Latex.git
 2. 点击选区旁的小型“复制到 Word”按钮。只选公式时使用公式悬浮工具栏。
 3. 在 Word 中正常粘贴。文字结构、Unicode 上下标和行内公式会按原顺序写入同一个富 HTML 剪贴板内容。
 
-选区按钮默认位于选区下方，并避让附近的原生 `menu/toolbar` 窗格；公式悬浮按钮保持独立。
+识别到 ChatGPT 或 Gemini 的原生选区操作且空间足够时，「复制到 Word」会贴靠在旁边，否则单独显示并尽量避开附近的工具条和 NextAI Translator 的划词图标。若想少弹一个图标，可在 NextAI Translator 中关闭「选中文字时显示图标」，需要翻译时使用它的右键菜单。公式悬浮按钮仍保持独立。
 
 ### 插件设置
 
@@ -138,8 +140,8 @@ npm test
 
 ## 商标与关联声明
 
-ChatGPT、OpenAI、Microsoft Word、Claude、DeepSeek、Gemini、Copilot、Chrome、Edge、KaTeX 和 Revolut 均为各自权利人的商标或产品名称。ChatGPT for SCI 是独立项目，与上述权利人不存在关联，也未获得其认可或赞助。
+ChatGPT、OpenAI、Microsoft Word、Claude、DeepSeek、Gemini、Copilot、Chrome、Edge、KaTeX 和 Revolut 均为各自权利人的商标或产品名称。ChatFacet 是独立项目，与上述权利人不存在关联，也未获得其认可或赞助。
 
 ## 许可证
 
-ChatGPT for SCI 使用 [MIT License](LICENSE) 开源。
+ChatFacet 使用 [MIT License](LICENSE) 开源。

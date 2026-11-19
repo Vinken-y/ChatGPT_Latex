@@ -40,6 +40,9 @@
   const QUICK_ACTIONS_HIDE_DELAY_MS = 140;
   const COMPATIBILITY_DEBOUNCE_MS = 120;
   const SELECTION_SETTLE_DELAY_MS = 48;
+  const SELECTION_REPOSITION_DELAY_MS = 160;
+  const NEXTAI_OVERLAY_ID = "__yetone-nextai-translator";
+  const ASK_CHATGPT_SELECTION_LABEL = /^(?:(?:ask|询问|詢問|问问|問問)\s*chatgpt|(?:向|对|對)\s*chatgpt\s*(?:提问|提問|发问|發問))[\s:：?？…]*$/i;
   const FORMULA_SLOT_PREFIX = "\uE000WLC_FORMULA_";
   const FORMULA_SLOT_SUFFIX = "_WLC\uE001";
   const WORD_INLINE_SPACER_HTML = '<span style="mso-spacerun:yes; white-space:pre"> </span>';
@@ -54,11 +57,13 @@
   let quickActionsHideTimer = null;
   let quickActionsPositionFrame = null;
   let selectionActions = null;
+  let dockedNativeAction = null;
   let selectionRange = null;
   let selectionSnapshot = null;
   let selectionCopyInFlight = false;
   let suppressNextSelectionClick = false;
   let selectionUpdateTimer = null;
+  let selectionRepositionTimer = null;
   let selectionPositionFrame = null;
   let pointerSelecting = false;
   let scanScheduled = false;
@@ -811,6 +816,8 @@
   function hideSelectionActions() {
     window.clearTimeout(selectionUpdateTimer);
     selectionUpdateTimer = null;
+    window.clearTimeout(selectionRepositionTimer);
+    selectionRepositionTimer = null;
     if (selectionPositionFrame !== null) {
       window.cancelAnimationFrame(selectionPositionFrame);
       selectionPositionFrame = null;
@@ -819,6 +826,7 @@
     selectionRange = null;
     selectionSnapshot = null;
     selectionActions?.classList.remove("is-visible");
+    setSelectionDock();
   }
 
   function visibleSelectionRects(range) {
@@ -841,14 +849,23 @@
       first.top < second.bottom && first.bottom > second.top;
   }
 
-  function nearbyNativeFloatingRects(selectionBounds) {
+  function visibleFloatingRect(element, nearby, maxWidth = 600, maxHeight = 240) {
+    const rect = element.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0 || rect.width > maxWidth || rect.height > maxHeight ||
+        !rectsOverlap(rect, nearby)) {
+      return null;
+    }
+    const style = window.getComputedStyle(element);
+    return style.visibility === "visible" && Number(style.opacity || 1) > 0 ? rect : null;
+  }
+
+  function nearbySelectionOverlays(nearby) {
     const selectors = [
       '[role="menu"]',
       '[role="toolbar"]',
       "[data-radix-popper-content-wrapper]",
       "[data-floating-ui-portal]"
     ].join(",");
-    const nearby = expandedRect(selectionBounds, 180);
     const results = [];
 
     for (const element of document.querySelectorAll(selectors)) {
@@ -856,25 +873,93 @@
         continue;
       }
 
-      const rect = element.getBoundingClientRect();
-      if (
-        rect.width <= 0 || rect.height <= 0 || rect.width > 600 || rect.height > 240 ||
-        !rectsOverlap(rect, nearby)
-      ) {
-        continue;
-      }
+      const rect = visibleFloatingRect(element, nearby);
+      if (rect) results.push({ element, rect });
+    }
 
-      const style = window.getComputedStyle(element);
-      if (style.visibility !== "hidden" && style.display !== "none" && Number(style.opacity || 1) > 0) {
-        results.push(rect);
-      }
+    const nextAi = document.getElementById(NEXTAI_OVERLAY_ID)?.shadowRoot;
+    for (const suffix of ["thumb", "card"]) {
+      const element = nextAi?.getElementById(NEXTAI_OVERLAY_ID + "-popup-" + suffix);
+      const rect = element && visibleFloatingRect(element, nearby, Infinity, Infinity);
+      if (rect) results.push({ element, rect });
     }
 
     return results;
   }
 
+  function findAskSelectionOverlay(nearby) {
+    const host = location.hostname;
+    if (host === "gemini.google.com") {
+      for (const button of document.querySelectorAll("highlight-to-ask-menu .ask-gemini-button button")) {
+        const rect = visibleFloatingRect(button, nearby, 320, 72);
+        if (rect) return { element: button, rect };
+      }
+      return null;
+    }
+    if (host !== "chatgpt.com" && host !== "chat.openai.com") {
+      return null;
+    }
+    for (const button of document.querySelectorAll('button, [role="button"]')) {
+      if (![button.getAttribute("aria-label"), button.getAttribute("title"), button.textContent,
+        ...Array.from(button.children, (child) => child.textContent)]
+        .some((label) => label && ASK_CHATGPT_SELECTION_LABEL.test(label.trim()))) {
+        continue;
+      }
+
+      const buttonRect = visibleFloatingRect(button, nearby, 320, 72);
+      if (!buttonRect || button.closest('[inert], [aria-hidden="true"], [contenteditable="true"]')) continue;
+      const panel = button.closest('[role="presentation"]');
+      const panelRect = panel && visibleFloatingRect(panel, nearby, 460, 90);
+      let element = button;
+      for (let depth = 0; element && depth < 6; depth += 1, element = element.parentElement) {
+        const position = window.getComputedStyle(element).position;
+        if (position !== "absolute" && position !== "fixed") continue;
+        const rect = visibleFloatingRect(element, nearby, 460, 90);
+        if (rect && rect.width >= buttonRect.width && rect.height >= buttonRect.height &&
+            rect.left <= buttonRect.left && rect.right >= buttonRect.right &&
+            rect.top <= buttonRect.top && rect.bottom >= buttonRect.bottom) {
+          if (panelRect && element.contains(panel) && Math.abs(panelRect.width - rect.width) <= 2 &&
+              Math.abs(panelRect.height - rect.height) <= 2) {
+            return { element: panel, rect: panelRect };
+          }
+          return { element, rect };
+        }
+      }
+    }
+    return null;
+  }
+
   function candidateRect(left, top, width, height) {
     return { left, top, right: left + width, bottom: top + height, width, height };
+  }
+
+  function setSelectionDock(anchor, side) {
+    const element = anchor?.element || null;
+    if (dockedNativeAction && dockedNativeAction !== element) {
+      delete dockedNativeAction.dataset.wlcSelectionDock;
+    }
+    dockedNativeAction = element;
+    if (!selectionActions) return;
+    if (!anchor) {
+      delete selectionActions.dataset.wlcDock;
+      for (const name of ["height", "background", "color", "border", "radius-top", "radius-bottom"]) {
+        selectionActions.style.removeProperty("--wlc-dock-" + name);
+      }
+      return;
+    }
+    element.dataset.wlcSelectionDock = side;
+    selectionActions.dataset.wlcDock = side;
+    const style = window.getComputedStyle(element);
+    const clear = style.backgroundColor === "rgba(0, 0, 0, 0)";
+    selectionActions.style.setProperty("--wlc-dock-height", anchor.rect.height + "px");
+    selectionActions.style.setProperty("--wlc-dock-background", clear ? "" : style.backgroundColor);
+    selectionActions.style.setProperty("--wlc-dock-color", clear ? "" : style.color);
+    selectionActions.style.setProperty("--wlc-dock-border", Number.parseFloat(style.borderTopWidth) > 0
+      ? style.borderTopColor : "");
+    selectionActions.style.setProperty("--wlc-dock-radius-top",
+      side === "right" ? style.borderTopLeftRadius : style.borderTopRightRadius);
+    selectionActions.style.setProperty("--wlc-dock-radius-bottom",
+      side === "right" ? style.borderBottomLeftRadius : style.borderBottomRightRadius);
   }
 
   function positionSelectionActions() {
@@ -893,27 +978,58 @@
     const first = rects[0];
     const last = rects[rects.length - 1];
     const bounds = selectionRange.getBoundingClientRect();
-    const width = selectionActions.offsetWidth;
-    const height = selectionActions.offsetHeight;
+    const width = selectionActions.getBoundingClientRect().width;
+    const height = 44;
     const gap = 8;
     const padding = 8;
-    const avoid = [
-      ...rects.map((rect) => expandedRect(rect, 3)),
-      ...nearbyNativeFloatingRects(bounds).map((rect) => expandedRect(rect, 4))
-    ];
+    const nearby = expandedRect(bounds, 180);
+    const overlays = nearbySelectionOverlays(nearby);
+    const anchor = findAskSelectionOverlay(nearby);
+    const selectionRects = rects.map((rect) => expandedRect(rect, 3));
+    const fits = (candidate, avoid) =>
+      candidate.left >= padding && candidate.top >= padding &&
+      candidate.right <= window.innerWidth - padding &&
+      candidate.bottom <= window.innerHeight - padding &&
+      !avoid.some((rect) => rectsOverlap(candidate, rect));
+    if (anchor) {
+      const obstacles = selectionRects.concat(overlays.filter(({ element }) =>
+        !anchor.element.contains(element) && !element.contains(anchor.element)
+      ).map(({ rect }) => expandedRect(rect, 4)));
+      const { top, height: nativeHeight } = anchor.rect;
+      const dock = [
+        ["right", candidateRect(anchor.rect.right, top, width, nativeHeight)],
+        ["left", candidateRect(anchor.rect.left - width, top, width, nativeHeight)]
+      ].find(([, candidate]) => fits(candidate, obstacles));
+      if (dock) {
+        setSelectionDock(anchor, dock[0]);
+        selectionActions.style.left = dock[1].left + "px";
+        selectionActions.style.top = dock[1].top + "px";
+        return;
+      }
+    }
+    setSelectionDock();
+    const avoid = selectionRects.concat(overlays.map(({ rect }) => expandedRect(rect, 4)));
+    if (anchor) avoid.push(expandedRect(anchor.rect, 4));
+    const clampX = (left) => Math.min(Math.max(padding, left), Math.max(padding, window.innerWidth - width - padding));
     const candidates = [
       candidateRect(last.left, last.bottom + gap, width, height),
       candidateRect(last.right - width, last.bottom + gap, width, height),
       candidateRect(last.right + gap, last.top + (last.height - height) / 2, width, height),
       candidateRect(last.left - width - gap, last.top + (last.height - height) / 2, width, height),
-      candidateRect(first.left, first.top - height - gap, width, height)
+      candidateRect(clampX(first.left), first.top - height - gap, width, height),
+      candidateRect(clampX(last.left), last.bottom + gap, width, height)
     ];
-    const fits = (candidate) =>
-      candidate.left >= padding && candidate.top >= padding &&
-      candidate.right <= window.innerWidth - padding &&
-      candidate.bottom <= window.innerHeight - padding &&
-      !avoid.some((rect) => rectsOverlap(candidate, rect));
-    let selected = candidates.find(fits);
+    let selected = candidates.find((candidate) => fits(candidate, avoid));
+
+    if (!selected) {
+      const left = clampX(last.left);
+      const above = Math.min(first.top, ...overlays.map(({ rect }) => rect.top), anchor?.rect.top ?? Infinity);
+      const below = Math.max(last.bottom, ...overlays.map(({ rect }) => rect.bottom), anchor?.rect.bottom ?? -Infinity);
+      selected = [
+        candidateRect(left, below + gap, width, height),
+        candidateRect(left, above - height - gap, width, height)
+      ].find((candidate) => fits(candidate, avoid));
+    }
 
     if (!selected) {
       const left = Math.min(
@@ -1022,7 +1138,8 @@
     const actions = ensureSelectionActions();
     positionSelectionActions();
     actions.classList.add("is-visible");
-    window.setTimeout(scheduleSelectionActionsPosition, 80);
+    window.clearTimeout(selectionRepositionTimer);
+    selectionRepositionTimer = window.setTimeout(scheduleSelectionActionsPosition, SELECTION_REPOSITION_DELAY_MS);
   }
 
   function scheduleSelectionActionsUpdate(delay) {
@@ -1271,7 +1388,7 @@
     const heading = document.createElement("div");
     const title = document.createElement("h2");
     title.id = "wlc-title";
-    title.textContent = translate("extensionName", "ChatGPT for SCI");
+    title.textContent = translate("extensionName", "ChatFacet");
     const subtitle = document.createElement("p");
     subtitle.textContent = translate("editorSubtitle", "Normalized LaTeX with Word-ready copy");
     heading.append(title, subtitle);

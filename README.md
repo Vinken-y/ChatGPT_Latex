@@ -1,12 +1,12 @@
-# ChatGPT for SCI
+# ChatFacet
 
-![ChatGPT for SCI icon](icons/128.png)
+![ChatFacet icon](icons/128.png)
 
 [![CI](https://github.com/Vinken-y/ChatGPT_Latex/actions/workflows/ci.yml/badge.svg)](https://github.com/Vinken-y/ChatGPT_Latex/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/Vinken-y/ChatGPT_Latex)](https://github.com/Vinken-y/ChatGPT_Latex/releases/latest)
 [![License](https://img.shields.io/github/license/Vinken-y/ChatGPT_Latex)](LICENSE)
 
-ChatGPT for SCI customizes ChatGPT and Gemini typography and moves scientific content from supported AI chat pages into Microsoft Word. Hover a recognized formula to copy the complete Word equation; select prose, formulas, or both to copy a Word-ready rich selection with real superscript and subscript formatting.
+ChatFacet is a visual and interaction enhancer for AI chats on the web. Customize typography and bold text colors in ChatGPT and Gemini, and use a compact selection toolbar to copy formatted text and editable equations to Microsoft Word.
 
 [简体中文](README.zh-CN.md) | [Privacy](PRIVACY.md) | [Security](SECURITY.md) | [Performance](docs/PERFORMANCE.md) | [Changelog](CHANGELOG.md)
 
@@ -43,11 +43,13 @@ The extension reads formula-related DOM on these explicitly matched sites. Selec
 
 ### GitHub release
 
-1. Download `ChatGPT_for_SCI-v1.6.0.zip` from the [v1.6.0 release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.6.0).
+1. Download `ChatFacet-v1.7.0.zip` from the [v1.7.0 release](https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.7.0).
 2. Extract the archive.
 3. Open `chrome://extensions` or `edge://extensions`.
 4. Enable **Developer mode**.
-5. Select **Load unpacked** and choose the extracted extension folder. After updating, reload the extension and refresh open chat pages.
+5. Select **Load unpacked** and choose the extracted extension folder.
+
+Upgrading from ChatGPT for SCI? Update the files in the existing unpacked directory, then reload the extension and refresh your chat tabs. Keeping the same directory preserves your local preferences.
 
 ### ChatGPT and Gemini fonts
 
@@ -87,7 +89,7 @@ For prose and mixed selections:
 2. Choose **Copy to Word** from the small action shown beside the selection. Formula-only selections use the formula hover toolbar.
 3. Paste normally in Word. Text structure, Unicode superscripts/subscripts, and inline equations are emitted in one rich HTML payload.
 
-The selection action is positioned below the selection by default and avoids nearby native `menu`/`toolbar` surfaces. Formula hover controls remain a separate interaction.
+When a supported ChatGPT or Gemini selection action is visible, Copy to Word can attach to its side. Otherwise it stays separate and looks for space away from nearby controls, including NextAI Translator's selection icon. To reduce extra overlays, turn off NextAI Translator's **Show icon when text is selected** and use its context menu instead. Formula hover controls remain independent.
 
 ### Settings
 
@@ -148,8 +150,8 @@ Contributions are welcome through [CONTRIBUTING.md](CONTRIBUTING.md). Please rep
 
 ## Trademark notice
 
-ChatGPT, OpenAI, Microsoft Word, Claude, DeepSeek, Gemini, Copilot, Chrome, Edge, KaTeX, and Revolut are trademarks or product names of their respective owners. ChatGPT for SCI is an independent project and is not affiliated with, endorsed by, or sponsored by those owners.
+ChatGPT, OpenAI, Microsoft Word, Claude, DeepSeek, Gemini, Copilot, Chrome, Edge, KaTeX, and Revolut are trademarks or product names of their respective owners. ChatFacet is an independent project and is not affiliated with, endorsed by, or sponsored by those owners.
 
 ## License
 
-ChatGPT for SCI is released under the [MIT License](LICENSE).
+ChatFacet is released under the [MIT License](LICENSE).

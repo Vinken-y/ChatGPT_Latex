@@ -102,4 +102,5 @@ if (!declaredKatex || declaredKatex !== bundledKatex.version) {
   fail(`Bundled KaTeX ${bundledKatex.version} must equal exact package dependency ${declaredKatex || "missing"}`);
 }
 
-console.log(`Validated ChatGPT for SCI ${manifest.version}: ${locales.length} locales, KaTeX ${bundledKatex.version}.`);
+const extensionName = readJson(path.join("_locales", manifest.default_locale, "messages.json")).extensionName.message;
+console.log(`Validated ${extensionName} ${manifest.version}: ${locales.length} locales, KaTeX ${bundledKatex.version}.`);

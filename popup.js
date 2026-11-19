@@ -36,7 +36,7 @@
 
   function localizePopup() {
     document.documentElement.lang = chrome.i18n?.getUILanguage?.() || "en";
-    document.title = translate("extensionName", "ChatGPT for SCI");
+    document.title = translate("extensionName", "ChatFacet");
     const version = chrome.runtime.getManifest().version;
     document.getElementById("version").textContent = `v${version}`;
     document.querySelectorAll("[data-i18n]").forEach((element) => {

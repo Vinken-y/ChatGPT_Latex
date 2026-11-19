@@ -1,8 +1,17 @@
 # Changelog / 更新日志
 
-All notable changes to ChatGPT for SCI are documented here. Dates use ISO 8601.
+All notable changes to ChatFacet (formerly ChatGPT for SCI) are documented here. Dates use ISO 8601.
 
-本文件记录 ChatGPT for SCI 的重要变更，日期使用 ISO 8601 格式。
+本文件记录 ChatFacet（原 ChatGPT for SCI）的重要变更，日期使用 ISO 8601 格式。
+
+## [1.7.0] - 2026-11-19
+
+- Renamed the extension to ChatFacet to reflect its focus on visual and interaction enhancements for web AI chats. Existing preferences carry over in the same unpacked directory.
+- 扩展更名为 ChatFacet，定位为网页版 AI 聊天的视觉与交互增强工具。沿用原加载目录时保留已有设置。
+- Dock Copy to Word beside supported ChatGPT and Gemini selection actions when space allows, with placement that avoids the NextAI Translator selection icon when possible.
+- 空间足够时将「复制到 Word」与 ChatGPT、Gemini 的原生选区操作并排显示，并尽量避开 NextAI Translator 的划词图标。
+- Match the visible ChatGPT selection panel and highlight the entire docked Word segment on hover.
+- 适配 ChatGPT「向 ChatGPT 提问」选区工具条，统一合并按钮的悬停样式。
 
 ## [1.6.0] - 2026-11-19
 
@@ -262,6 +271,7 @@ All notable changes to ChatGPT for SCI are documented here. Dates use ISO 8601.
 - Added automated source checks, manifest/localization validation, unit tests, and extension fixtures.
 - 新增源码语法检查、Manifest/本地化校验、单元测试和扩展测试页面。
 
+[1.7.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.7.0
 [1.6.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.6.0
 [1.5.2]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.5.2
 [1.2.0]: https://github.com/Vinken-y/ChatGPT_Latex/releases/tag/v1.2.0
